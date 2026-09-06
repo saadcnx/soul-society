@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Aura Reveal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Quicksand:wght@400;500;600;700&family=Creepster&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-a:#fbe4ff;
+    --bg-b:#dff6f2;
+    --ink:#3a2e52;
+    --ink-soft:#6b5f8a;
+    --coral:#ff6f91;
+    --gold:#ffc85c;
+    --mint:#69dcb0;
+    --violet:#9b7bf0;
+    --radius:28px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    padding:24px;
+    font-family:'Quicksand',sans-serif;
+    color:var(--ink);
+    background:linear-gradient(135deg,var(--bg-a),var(--bg-b));
+    transition:background 0.4s ease;
+    overflow:hidden;
+    position:relative;
+  }
+  .card{
+    position:relative;z-index:2;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(6px);
+    border-radius:var(--radius);
+    padding:48px 40px;
+    max-width:420px;width:100%;text-align:center;
+    box-shadow:0 30px 60px -20px rgba(58,46,82,0.25);
+  }
+  .stage{display:none;}
+  .stage.active{display:block;}
+
+  /* --- loading stage --- */
+  .spinner-orb{
+    width:64px;height:64px;margin:0 auto 22px;border-radius:50%;
+    background:conic-gradient(from 0deg,var(--violet),var(--coral),var(--gold),var(--mint),var(--violet));
+    animation:spin 1.4s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-text{font-size:16px;color:var(--ink-soft);}
+
+  /* --- reveal-tap stage --- */
+  h1{font-family:'Baloo 2',cursive;font-size:26px;margin:0 0 14px;}
+  .tap-sub{color:var(--ink-soft);font-size:15px;margin:0 0 26px;}
+  .btn-primary{
+    font-family:'Quicksand',sans-serif;font-weight:700;font-size:17px;color:#fff;
+    background:linear-gradient(135deg,var(--violet),var(--coral));
+    border:none;padding:16px 32px;border-radius:999px;cursor:pointer;
+    box-shadow:0 12px 24px -10px rgba(155,123,240,0.55);
+    transition:transform 0.15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px);}
+  .btn-primary:focus-visible{outline:3px solid var(--violet);outline-offset:3px;}
+
+  /* --- gotcha stage --- */
+  .gotcha-title{
+    font-family:'Creepster',cursive;
+    font-size:56px;color:#c81d25;
+    margin:0 0 10px;
+    text-shadow:0 0 18px rgba(200,29,37,0.35);
+  }
+  .gotcha-sub{font-family:'Baloo 2',cursive;font-size:20px;margin:0 0 10px;}
+  .gotcha-note{color:var(--ink-soft);font-size:14px;margin:0 0 26px;}
+
+  /* --- fullscreen scare overlay --- */
+  .scare-overlay{
+    position:fixed;inset:0;z-index:50;
+    background:#050505;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;
+  }
+  .scare-overlay.show{opacity:1;pointer-events:auto;}
+  .scare-face{
+    width:min(70vw,340px);
+    transform:scale(0.7);
+    filter:drop-shadow(0 0 40px rgba(200,29,37,0.6));
+  }
+  .scare-overlay.pop .scare-face{
+    animation:scarePop 0.35s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  @keyframes scarePop{
+    0%{transform:scale(0.6);}
+    60%{transform:scale(1.18);}
+    100%{transform:scale(1);}
+  }
+  .scare-overlay.shake{animation:scareShake 0.5s ease;}
+  @keyframes scareShake{
+    0%,100%{transform:translate(0,0);}
+    20%{transform:translate(-8px,4px);}
+    40%{transform:translate(7px,-5px);}
+    60%{transform:translate(-6px,-3px);}
+    80%{transform:translate(6px,5px);}
+  }
+  .flash{
+    position:fixed;inset:0;z-index:51;background:#c81d25;
+    opacity:0;pointer-events:none;
+  }
+  .flash.pulse{animation:flashPulse 0.5s ease;}
+  @keyframes flashPulse{
+    0%{opacity:0;}
+    15%{opacity:0.55;}
+    30%{opacity:0;}
+    50%{opacity:0.35;}
+    70%{opacity:0;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scare-overlay.shake{animation:none;}
+    .flash.pulse{animation:none;}
+    .scare-overlay.pop .scare-face{animation:none;transform:scale(1);}
+  }
+</style>
+</head>
+<body>
+
+  <main class="card">
+    <section class="stage active" id="stageLoading">
+      <div class="spinner-orb"></div>
+      <p class="loading-text">Reading your aura…</p>
+    </section>
+
+    <section class="stage" id="stageTap">
+      <h1>Your aura is ready</h1>
+      <p class="tap-sub">Tap below to reveal your colour.</p>
+      <button class="btn-primary" id="revealBtn">Reveal my aura ✨</button>
+    </section>
+
+    <section class="stage" id="stageGotcha">
+      <p class="gotcha-title">GOTCHA</p>
+      <p class="gotcha-sub">You just got pranked 👻</p>
+      <p class="gotcha-note">Nobody's aura is actually this cursed. Go find your next victim.</p>
+      <button class="btn-primary" onclick="location.href='index.html'">Try it again</button>
+    </section>
+  </main>
+
+  <div class="flash" id="flash"></div>
+  <div class="scare-overlay" id="scareOverlay">
+    <svg class="scare-face" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="110" rx="78" ry="95" fill="#e9e2df"/>
+      <ellipse cx="100" cy="118" rx="78" ry="88" fill="#050505" opacity="0.04"/>
+      <circle cx="68" cy="100" r="22" fill="#050505"/>
+      <circle cx="132" cy="100" r="22" fill="#050505"/>
+      <circle cx="62" cy="93" r="5" fill="#ffffff" opacity="0.5"/>
+      <circle cx="126" cy="93" r="5" fill="#ffffff" opacity="0.5"/>
+      <path d="M55 165 Q100 210 145 165 Q140 150 100 155 Q60 150 55 165 Z" fill="#050505"/>
+      <path d="M60 165 L66 152 L72 165 L78 150 L84 165 L90 150 L96 165 L100 148 L104 165 L110 150 L116 165 L122 152 L128 165 L134 150 L140 165"
+        fill="none" stroke="#e9e2df" stroke-width="2"/>
+      <path d="M45 60 Q68 40 88 55" stroke="#050505" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M155 60 Q132 40 112 55" stroke="#050505" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+<script>
+  const stageLoading = document.getElementById('stageLoading');
+  const stageTap = document.getElementById('stageTap');
+  const stageGotcha = document.getElementById('stageGotcha');
+  const revealBtn = document.getElementById('revealBtn');
+  const scareOverlay = document.getElementById('scareOverlay');
+  const flash = document.getElementById('flash');
+  const body = document.body;
+
+  function showStage(stage){
+    [stageLoading, stageTap, stageGotcha].forEach(s => s.classList.remove('active'));
+    stage.classList.add('active');
+  }
+
+  // fake "reading your aura" delay, then ask for the tap (this is our user-gesture point for audio)
+  setTimeout(() => showStage(stageTap), 1700);
+
+  function playScare(){
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const now = ctx.currentTime;
+
+      // noise burst — the "shriek" texture
+      const bufferSize = Math.floor(ctx.sampleRate * 1.1);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++){ data[i] = Math.random() * 2 - 1; }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const bandpass = ctx.createBiquadFilter();
+      bandpass.type = 'bandpass';
+      bandpass.Q.value = 6;
+      bandpass.frequency.setValueAtTime(400, now);
+      bandpass.frequency.exponentialRampToValueAtTime(3200, now + 0.22);
+      bandpass.frequency.exponentialRampToValueAtTime(600, now + 0.95);
+
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.0001, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.8, now + 0.05);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.05);
+
+      noise.connect(bandpass).connect(noiseGain).connect(ctx.destination);
+
+      // pitch-swept shriek layer
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(820, now + 0.18);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.85);
+      const oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0.0001, now);
+      oscGain.gain.exponentialRampToValueAtTime(0.45, now + 0.05);
+      oscGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+      osc.connect(oscGain).connect(ctx.destination);
+
+      // low thump for impact
+      const thump = ctx.createOscillator();
+      thump.type = 'sine';
+      thump.frequency.setValueAtTime(90, now);
+      thump.frequency.exponentialRampToValueAtTime(38, now + 0.3);
+      const thumpGain = ctx.createGain();
+      thumpGain.gain.setValueAtTime(0.7, now);
+      thumpGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+      thump.connect(thumpGain).connect(ctx.destination);
+
+      noise.start(now); noise.stop(now + 1.1);
+      osc.start(now); osc.stop(now + 0.9);
+      thump.start(now); thump.stop(now + 0.32);
+    } catch (e) { /* audio unsupported — visual scare still plays */ }
+  }
+
+  revealBtn.addEventListener('click', () => {
+    playScare();
+    scareOverlay.classList.add('show', 'pop', 'shake');
+    flash.classList.add('pulse');
+    setTimeout(() => {
+      scareOverlay.classList.remove('show', 'pop', 'shake');
+      flash.classList.remove('pulse');
+      showStage(stageGotcha);
+    }, 1300);
+  });
+</script>
+</body>
+</html>

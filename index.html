@@ -1,122 +1,127 @@
-html
-<!DOCTYPE html>
-<html lang="ur">
+<!doctype html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Is Ghar Mein Koi Hai...</title>
-<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" rel="stylesheet">
+<title>Find Your Aura ✨</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --blood:#b3001b;
-    --glow:#ff2e2e;
+    --bg-a:#fbe4ff;
+    --bg-b:#dff6f2;
+    --card:#ffffff;
+    --ink:#3a2e52;
+    --ink-soft:#6b5f8a;
+    --coral:#ff6f91;
+    --gold:#ffc85c;
+    --mint:#69dcb0;
+    --violet:#9b7bf0;
+    --radius:28px;
   }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{
-    height:100%;
-    background:#000;
-    overflow:hidden;
-    font-family:'Nosifer', cursive;
-    color:#ddd;
-  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
   body{
+    margin:0;
+    min-height:100vh;
     display:flex;
     align-items:center;
     justify-content:center;
-    position:relative;
-  }
-  .vignette{
-    position:fixed;inset:0;
-    pointer-events:none;
-    background:radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%);
-    z-index:5;
-  }
-  #intro{
-    text-align:center;
-    padding:20px;
-    z-index:2;
-  }
-  #intro h1{
-    font-family:'Creepster', cursive;
-    font-size:clamp(2rem,7vw,4rem);
-    color:var(--blood);
-    text-shadow:0 0 8px var(--glow), 0 0 20px var(--glow);
-    animation:flicker 2.5s infinite;
-  }
-  @keyframes flicker{
-    0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;}
-    20%,22%,24%,55%{opacity:0.3;}
-  }
-  #intro p{
-    margin-top:18px;
-    font-family:sans-serif;
-    color:#888;
-    font-size:0.95rem;
-    letter-spacing:1px;
-  }
-  #enterBtn{
-    margin-top:35px;
-    padding:14px 34px;
-    background:transparent;
-    border:2px solid var(--blood);
-    color:var(--glow);
-    font-family:'Nosifer',cursive;
-    font-size:1rem;
-    cursor:pointer;
-    letter-spacing:2px;
-    transition:.25s;
-  }
-  #enterBtn:hover{
-    background:var(--blood);
-    color:#000;
-    box-shadow:0 0 25px var(--glow);
-  }
-  #typedLine{
-    min-height:1.4em;
-    font-family:monospace;
-    color:#4dff4d;
-    margin-top:20px;
-    font-size:1rem;
-  }
-  /* Scan / suspense screen */
-  #scan{
-    display:none;
-    text-align:center;
-    z-index:2;
-    width:80%;
-    max-width:420px;
-  }
-  #scan h2{
-    font-family:monospace;
-    color:#4dff4d;
-    margin-bottom:14px;
-    font-size:1rem;
-  }
-  .bar{
-    width:100%;
-    height:22px;
-    border:2px solid #4dff4d;
-    position:relative;
+    padding:24px;
+    font-family:'Quicksand',sans-serif;
+    color:var(--ink);
+    background:linear-gradient(135deg,var(--bg-a),var(--bg-b));
     overflow:hidden;
+    position:relative;
   }
-  .bar-fill{
-    height:100%;
-    width:0%;
-    background:repeating-linear-gradient(45deg,#4dff4d,#4dff4d 10px,#1a1a1a 10px,#1a1a1a 20px);
-    transition:width .05s linear;
+  .orb{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(40px);
+    opacity:0.55;
+    animation:drift 14s ease-in-out infinite;
   }
-  /* Jumpscare screen */
-  #scare{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:#000;
-    z-index:20;
-    align-items:center;
-    justify-content:center;
+  .orb-a{width:260px;height:260px;background:var(--violet);top:-60px;left:-60px;animation-delay:0s;}
+  .orb-b{width:220px;height:220px;background:var(--coral);bottom:-70px;right:-40px;animation-delay:2s;}
+  .orb-c{width:160px;height:160px;background:var(--gold);bottom:20%;left:8%;animation-delay:4s;}
+  @keyframes drift{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(18px,-24px) scale(1.08);}
   }
-  #scare svg{
-    width:70vw;
-    max-width:480px;
-    filter:drop-shadow(0 0 40px red);
+  .card{
+    position:relative;
+    z-index:2;
+    background:rgba(255,255,255,0.82);
+    backdrop-filter:blur(6px);
+    border-radius:var(--radius);
+    padding:48px 40px;
+    max-width:420px;
+    width:100%;
+    text-align:center;
+    box-shadow:0 30px 60px -20px rgba(58,46,82,0.25);
   }
+  .glow-ring{
+    width:84px;height:84px;
+    margin:0 auto 20px;
+    border-radius:50%;
+    background:conic-gradient(from 0deg,var(--violet),var(--coral),var(--gold),var(--mint),var(--violet));
+    display:flex;align-items:center;justify-content:center;
+  }
+  .glow-ring span{
+    width:66px;height:66px;border-radius:50%;
+    background:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:28px;
+  }
+  h1{
+    font-family:'Baloo 2',cursive;
+    font-size:32px;
+    line-height:1.15;
+    margin:0 0 12px;
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:16px;
+    line-height:1.5;
+    margin:0 0 28px;
+  }
+  .btn-primary{
+    font-family:'Quicksand',sans-serif;
+    font-weight:700;
+    font-size:17px;
+    color:#fff;
+    background:linear-gradient(135deg,var(--violet),var(--coral));
+    border:none;
+    padding:16px 32px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow:0 12px 24px -10px rgba(155,123,240,0.55);
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 28px -10px rgba(155,123,240,0.6);}
+  .btn-primary:active{transform:translateY(0);}
+  .btn-primary:focus-visible{outline:3px solid var(--violet);outline-offset:3px;}
+  .footnote{
+    margin-top:18px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .orb{animation:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+
+  <main class="card">
+    <div class="glow-ring"><span>🔮</span></div>
+    <h1>What's your aura today?</h1>
+    <p class="sub">Answer three quick questions and we'll tell you the colour that's been following you around all week.</p>
+    <button class="btn-primary" onclick="location.href='quiz.html'">Start the reading</button>
+    <p class="footnote">Takes about a minute</p>
+  </main>
+</body>
+</html>

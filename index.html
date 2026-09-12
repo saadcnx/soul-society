@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ur-Latn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mujhe maaf kar do</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#fff3ef;
+    --bg-2:#fbe1e6;
+    --ink:#3a2a34;
+    --ink-soft:#7a6270;
+    --rose:#e85d75;
+    --rose-deep:#c8425c;
+    --gold:#f2b84b;
+    --card-bg: rgba(255,255,255,0.62);
+    --card-border: rgba(255,255,255,0.8);
+    --no-bg:#ecdfe2;
+    --no-ink:#6b5560;
+    --sun:#f7c948;
+    --sun-deep:#e0a422;
+    --cat-body:#f6e2b8;
+    --cat-dark:#6b4a37;
+    --cat-blush:#f2a7ae;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    height:100%;
+    margin:0;
+  }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Quicksand', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 12%, #ffffff66, transparent 42%),
+      radial-gradient(circle at 88% 90%, #ffffff45, transparent 48%),
+      linear-gradient(160deg, #fff8e6, var(--bg-1) 45%, var(--bg-2));
+    overflow-x:hidden;
+    position:relative;
+    padding: 24px;
+  }
+
+  .scene{
+    position:relative;
+    width:100%;
+    max-width:460px;
+    z-index:2;
+  }
+
+  .card{
+    position:relative;
+    background:var(--card-bg);
+    border:1px solid var(--card-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius:28px;
+    padding:44px 34px 38px;
+    text-align:center;
+    box-shadow: 0 30px 60px -25px rgba(150, 70, 90, 0.35), 0 8px 30px -12px rgba(224, 164, 34, 0.25);
+    transition: transform .4s ease;
+    animation: cardIn .8s cubic-bezier(.2,.8,.2,1) both;
+  }
+
+  .heart{
+    width:64px;
+    height:64px;
+    margin:0 auto 18px;
+    display:block;
+    animation: beat 2.6s ease-in-out infinite;
+    transform-origin:center;
+    filter: drop-shadow(0 6px 16px rgba(242, 184, 75, 0.45));
+  }
+
+  @keyframes beat{
+    0%, 100% { transform: scale(1); }
+    18% { transform: scale(1.12); }
+    32% { transform: scale(0.98); }
+    45% { transform: scale(1.06); }
+  }
+
+  @keyframes cardIn{
+    0% { opacity:0; transform: translateY(18px) scale(.97); }
+    100% { opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: clamp(28px, 6vw, 34px);
+    line-height:1.2;
+    margin: 0 0 12px;
+  }
+
+  h1 em{
+    font-style: italic;
+    font-weight:500;
+    color:var(--rose-deep);
+  }
+
+  p.sub{
+    font-size:16px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    margin:0 0 30px;
+    max-width: 34ch;
+    margin-inline:auto;
+  }
+
+  .buttons{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  button{
+    font-family:'Quicksand', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    border:none;
+    border-radius:999px;
+    padding:14px 26px;
+    cursor:pointer;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+
+  button:focus-visible{
+    outline: 3px solid var(--rose-deep);
+    outline-offset:3px;
+  }
+
+  .yes{
+    background: linear-gradient(135deg, var(--rose), var(--rose-deep));
+    color:#fff;
+    box-shadow: 0 12px 24px -10px rgba(200, 66, 92, 0.55);
+  }
+  .yes:hover{ transform: translateY(-2px); }
+
+  .no{
+    background: var(--no-bg);
+    color: var(--no-ink);
+    z-index: 50;
+  }
+
+  .no.roaming{
+    position: fixed;
+    transition: left .28s cubic-bezier(.34,1.56,.64,1), top .28s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  .caption{
+    min-height: 22px;
+    margin-top:18px;
+    font-size:14px;
+    color: var(--ink-soft);
+  }
+
+  .cat{
+    position:absolute;
+    bottom:-22px;
+    width:84px;
+    z-index:3;
+    animation: catIdle 3.4s ease-in-out infinite;
+    filter: drop-shadow(0 10px 14px rgba(107,74,55,0.2));
+  }
+
+  .cat-left{ left:-20px; animation-delay: .3s; }
+  .cat-right{ right:-20px; transform: scaleX(-1); }
+
+  .cat.bounce{ animation: catBounce .9s ease; }
+
+  @keyframes catIdle{
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .cat-right.bounce{ animation: catBounceFlip .9s ease; }
+
+  @keyframes catBounce{
+    0% { transform: translateY(0) rotate(0deg); }
+    30% { transform: translateY(-16px) rotate(-6deg); }
+    55% { transform: translateY(0) rotate(4deg); }
+    75% { transform: translateY(-8px) rotate(-2deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+
+  @keyframes catBounceFlip{
+    0% { transform: scaleX(-1) translateY(0) rotate(0deg); }
+    30% { transform: scaleX(-1) translateY(-16px) rotate(-6deg); }
+    55% { transform: scaleX(-1) translateY(0) rotate(4deg); }
+    75% { transform: scaleX(-1) translateY(-8px) rotate(-2deg); }
+    100% { transform: scaleX(-1) translateY(0) rotate(0deg); }
+  }
+
+  .sky-rain{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:1;
+  }
+
+  .petal{
+    position:absolute;
+    top:-40px;
+    animation-name: petalFall;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+    will-change: transform, opacity;
+  }
+
+  @keyframes petalFall{
+    0% { transform: translate(0,0) rotate(0deg); opacity:0; }
+    10% { opacity:.85; }
+    100% { transform: translate(var(--sway, 20px), 105vh) rotate(220deg); opacity:0; }
+  }
+
+  /* celebration state */
+  .card.happy .pre-yes{ display:none; }
+  .card .post-yes{ display:none; }
+  .card.happy .post-yes{ display:block; }
+
+  .post-yes h1{ color: var(--rose-deep); }
+
+  .confetti{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index: 5;
+  }
+
+  .bit{
+    position:absolute;
+    top:-40px;
+    font-size: 20px;
+    animation-name: fall;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+    will-change: transform, opacity;
+  }
+
+  @keyframes fall{
+    0%{ transform: translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform: translateY(105vh) rotate(240deg); opacity:0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .heart{ animation:none; }
+    .card{ animation:none; }
+    .cat{ animation:none; }
+    .bit{ animation: none; display:none; }
+    .petal{ animation: none; display:none; }
+    .no.roaming{ transition:none; }
+  }
+
+  @media (max-width: 380px){
+    .card{ padding:36px 22px 30px; }
+    .cat{ width:60px; bottom:-14px; }
+    .cat-left{ left:-6px; }
+    .cat-right{ right:-6px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <div class="card" id="card">
+
+    <div class="pre-yes">
+      <svg class="heart" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M32 56C32 56 6 40.5 6 22.5C6 12.7 13.4 6 22 6C27 6 30.6 8.6 32 12C33.4 8.6 37 6 42 6C50.6 6 58 12.7 58 22.5C58 40.5 32 56 32 56Z"
+          fill="#e85d75"/>
+      </svg>
+      <h1>Mujhe <em>maaf</em> kar do?</h1>
+      <p class="sub">Pata hai maine galti ki, par tum meri best dost ho. Ek dafa "Haan" bol do na 🥺</p>
+
+      <div class="buttons">
+        <button class="yes" id="yesBtn">Haan, maaf kiya 💛</button>
+        <button class="no" id="noBtn">Nahi</button>
+      </div>
+
+      <p class="caption" id="caption" aria-live="polite"></p>
+    </div>
+
+    <div class="post-yes" aria-live="polite">
+      <svg class="heart" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M32 56C32 56 6 40.5 6 22.5C6 12.7 13.4 6 22 6C27 6 30.6 8.6 32 12C33.4 8.6 37 6 42 6C50.6 6 58 12.7 58 22.5C58 40.5 32 56 32 56Z"
+          fill="#e85d75"/>
+      </svg>
+      <h1>Yayyy! 🎉</h1>
+      <p class="sub">Thank you dost! Tumhare bina sab adhoora lagta hai 🌻</p>
+    </div>
+
+  </div>
+
+  <svg class="cat cat-left" id="catLeft" viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M100 100 C 122 90, 118 60, 96 58" stroke="var(--cat-body)" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <ellipse cx="60" cy="92" rx="38" ry="32" fill="var(--cat-body)"/>
+    <circle cx="60" cy="52" r="32" fill="var(--cat-body)"/>
+    <path d="M32 34 L20 6 L48 26 Z" fill="var(--cat-body)"/>
+    <path d="M88 34 L100 6 L72 26 Z" fill="var(--cat-body)"/>
+    <path d="M33 28 L26 12 L44 24 Z" fill="var(--cat-blush)"/>
+    <path d="M87 28 L94 12 L76 24 Z" fill="var(--cat-blush)"/>
+    <path d="M42 52 Q48 46 54 52" stroke="var(--cat-dark)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M66 52 Q72 46 78 52" stroke="var(--cat-dark)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M57 60 L63 60 L60 65 Z" fill="var(--cat-blush)"/>
+    <path d="M60 65 Q60 70 54 70 M60 65 Q60 70 66 70" stroke="var(--cat-dark)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M20 58 L40 56 M20 66 L40 64" stroke="var(--cat-dark)" stroke-width="2" opacity="0.6" stroke-linecap="round"/>
+    <path d="M100 58 L80 56 M100 66 L80 64" stroke="var(--cat-dark)" stroke-width="2" opacity="0.6" stroke-linecap="round"/>
+    <ellipse cx="42" cy="118" rx="12" ry="9" fill="var(--cat-body)"/>
+    <ellipse cx="78" cy="118" rx="12" ry="9" fill="var(--cat-body)"/>
+  </svg>
+
+  <svg class="cat cat-right" id="catRight" viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M100 100 C 122 90, 118 60, 96 58" stroke="var(--cat-body)" stroke-width="14" stroke-linecap="round" fill="none"/>
+    <ellipse cx="60" cy="92" rx="38" ry="32" fill="var(--cat-body)"/>
+    <circle cx="60" cy="52" r="32" fill="var(--cat-body)"/>
+    <path d="M32 34 L20 6 L48 26 Z" fill="var(--cat-body)"/>
+    <path d="M88 34 L100 6 L72 26 Z" fill="var(--cat-body)"/>
+    <path d="M33 28 L26 12 L44 24 Z" fill="var(--cat-blush)"/>
+    <path d="M87 28 L94 12 L76 24 Z" fill="var(--cat-blush)"/>
+    <path d="M42 52 Q48 46 54 52" stroke="var(--cat-dark)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M66 52 Q72 46 78 52" stroke="var(--cat-dark)" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M57 60 L63 60 L60 65 Z" fill="var(--cat-blush)"/>
+    <path d="M60 65 Q60 70 54 70 M60 65 Q60 70 66 70" stroke="var(--cat-dark)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M20 58 L40 56 M20 66 L40 64" stroke="var(--cat-dark)" stroke-width="2" opacity="0.6" stroke-linecap="round"/>
+    <path d="M100 58 L80 56 M100 66 L80 64" stroke="var(--cat-dark)" stroke-width="2" opacity="0.6" stroke-linecap="round"/>
+    <ellipse cx="42" cy="118" rx="12" ry="9" fill="var(--cat-body)"/>
+    <ellipse cx="78" cy="118" rx="12" ry="9" fill="var(--cat-body)"/>
+  </svg>
+</div>
+
+<div class="sky-rain" id="skyRain"></div>
+<div class="confetti" id="confetti"></div>
+
+<script>
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+  const card = document.getElementById('card');
+  const caption = document.getElementById('caption');
+  const confettiBox = document.getElementById('confetti');
+  const skyRain = document.getElementById('skyRain');
+  const cats = document.querySelectorAll('.cat');
+
+  const dodgeLines = [
+    "Arre, 'Nahi' bolna allowed nahi hai 😅",
+    "Pehle pakadke to dikhao 😌",
+    "Itni jaldi haar nahi manti main",
+    "Chalo 'Haan' pe hi click kar do ab 🥹",
+    "Dosti itni kamzor thodi hoti hai 💛",
+    "Button bhi tumhari tarah stubborn hai 😄"
+  ];
+
+  let attempts = 0;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function moveNoButton(){
+    const rect = noBtn.getBoundingClientRect();
+    const w = rect.width || 90;
+    const h = rect.height || 48;
+    const maxX = Math.max(window.innerWidth - w - 16, 16);
+    const maxY = Math.max(window.innerHeight - h - 16, 16);
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+
+    if (!noBtn.classList.contains('roaming')){
+      noBtn.classList.add('roaming');
+    }
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
+  }
+
+  noBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    caption.textContent = dodgeLines[attempts % dodgeLines.length];
+    attempts++;
+    moveNoButton();
+  });
+
+  function burstConfetti(){
+    if (reduceMotion) return;
+    const bits = ['🌻','💛','✨','🎉','💗'];
+    const count = 26;
+    for (let i = 0; i < count; i++){
+      const span = document.createElement('span');
+      span.className = 'bit';
+      span.textContent = bits[Math.floor(Math.random() * bits.length)];
+      const left = Math.random() * 100;
+      const duration = 2.4 + Math.random() * 1.6;
+      const delay = Math.random() * 0.6;
+      span.style.left = left + 'vw';
+      span.style.animationDuration = duration + 's';
+      span.style.animationDelay = delay + 's';
+      span.style.fontSize = (14 + Math.random() * 14) + 'px';
+      confettiBox.appendChild(span);
+      setTimeout(() => span.remove(), (duration + delay) * 1000 + 200);
+    }
+  }
+
+  yesBtn.addEventListener('click', () => {
+    card.classList.add('happy');
+    burstConfetti();
+    cats.forEach(c => {
+      c.classList.remove('bounce');
+      void c.offsetWidth;
+      c.classList.add('bounce');
+    });
+  });
+
+  function spawnPetal(){
+    const span = document.createElement('span');
+    span.className = 'petal';
+    span.textContent = '🌻';
+    const left = Math.random() * 100;
+    const duration = 7 + Math.random() * 5;
+    const size = 16 + Math.random() * 14;
+    const sway = (Math.random() * 80 - 40) + 'px';
+    span.style.left = left + 'vw';
+    span.style.fontSize = size + 'px';
+    span.style.setProperty('--sway', sway);
+    span.style.animationDuration = duration + 's';
+    skyRain.appendChild(span);
+    setTimeout(() => span.remove(), duration * 1000 + 200);
+  }
+
+  let rainTimer = null;
+  function startSunflowerRain(){
+    if (reduceMotion) return;
+    spawnPetal();
+    rainTimer = setInterval(spawnPetal, 550);
+  }
+
+  startSunflowerRain();
+
+  window.addEventListener('resize', () => {
+    if (noBtn.classList.contains('roaming')){
+      moveNoButton();
+    }
+  });
+</script>
+
+</body>
+</html>

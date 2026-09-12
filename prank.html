@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A safe, loud, jump-scare prank page from The Hollow House." />
+  <meta name="theme-color" content="#05060a" />
+  <title>The Prank | The Hollow House</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Special+Elite&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="prank">
+
+  <div class="fog" aria-hidden="true">
+    <span class="fog__layer fog__layer--1"></span>
+    <span class="fog__layer fog__layer--2"></span>
+    <span class="fog__layer fog__layer--3"></span>
+  </div>
+
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand__mark" aria-hidden="true">☠</span>
+      <span class="brand__text">Hollow&nbsp;House</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="siteNav">
+      MENU
+    </button>
+    <nav class="site-nav" id="siteNav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="stories.html">Stories</a>
+      <a href="prank.html" class="is-active">The Prank</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-head">
+      <p class="page-head__eyebrow">Chapter III</p>
+      <h1 class="page-head__title flicker" data-text="THE PRANK">THE PRANK</h1>
+      <p class="page-head__sub">
+        Hand this phone to a friend. Press start. Then take three steps back.
+      </p>
+    </section>
+
+    <section class="section" aria-labelledby="setupTitle">
+      <div class="panel" id="prankIntro">
+        <h2 class="panel__title" id="setupTitle">Before you begin</h2>
+        <ul class="panel__list">
+          <li>🔊 <strong>Sound is loud.</strong> Turn your phone volume down first.</li>
+          <li>⚡ <strong>Flashing visuals.</strong> Skip this if you're photosensitive.</li>
+          <li>❤ <strong>Ask first.</strong> Don't prank someone with a heart condition or anxiety.</li>
+          <li>😂 <strong>It's fake.</strong> Nothing here is real. It ends with a joke.</li>
+        </ul>
+
+        <label class="check">
+          <input type="checkbox" id="acceptPrank" />
+          <span>I understand. Prank me anyway.</span>
+        </label>
+
+        <button class="btn btn--blood" id="startPrank" type="button" disabled>
+          Start The Prank
+        </button>
+        <p class="panel__hint">The button unlocks when you tick the box.</p>
+      </div>
+
+      <div class="stage" id="prankStage" hidden>
+        <p class="stage__hint" id="whisper">Get comfortable…</p>
+        <p class="stage__count" id="countdown">3</p>
+        <p class="stage__note">Do not look away from the screen.</p>
+      </div>
+    </section>
+
+    <section class="section section--alt" aria-labelledby="afterTitle">
+      <header class="section__head">
+        <p class="section__eyebrow">Aftermath</p>
+        <h2 class="section__title" id="afterTitle">Prank Etiquette</h2>
+        <p class="section__sub">Because a good prank ends with everyone laughing.</p>
+      </header>
+
+      <div class="grid grid--3">
+        <article class="card">
+          <span class="card__icon" aria-hidden="true">🤝</span>
+          <h3 class="card__title">Reveal it fast</h3>
+          <p class="card__body">The page reveals itself in under two seconds. Don't drag it out.</p>
+        </article>
+        <article class="card">
+          <span class="card__icon" aria-hidden="true">🫂</span>
+          <h3 class="card__title">Check on them</h3>
+          <p class="card__body">If they're actually scared, stop. Hugs beat content every time.</p>
+        </article>
+        <article class="card">
+          <span class="card__icon" aria-hidden="true">🔁</span>
+          <h3 class="card__title">Let them prank you back</h3>
+          <p class="card__body">Fair is fair. Hand over your phone and accept your fate.</p>
+        </article>
+      </div>
+
+      <div class="center">
+        <button class="btn btn--ghost" id="replayBtn" type="button">Replay The Prank</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p class="site-footer__quote">"It was never a ghost. It was your friend. Probably."</p>
+    <nav class="site-footer__nav" aria-label="Footer">
+      <a href="index.html">Home</a>
+      <a href="stories.html">Stories</a>
+      <a href="prank.html">The Prank</a>
+    </nav>
+    <p class="site-footer__legal">
+      A fictional prank site. Nothing here is real except the sound effects being too loud.
+    </p>
+  </footer>
+
+  <div class="scare" id="scare" aria-hidden="true">
+    <svg class="scare__face" viewBox="0 0 400 500" role="img" aria-label="Scary face">
+      <defs>
+        <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="30%" stop-color="#ff3b3b" />
+          <stop offset="100%" stop-color="#3a0000" stop-opacity="0" />
+        </radialGradient>
+        <filter id="soften">
+          <feGaussianBlur stdDeviation="7" />
+        </filter>
+      </defs>
+      <ellipse cx="200" cy="250" rx="152" ry="212" fill="#0a0507" filter="url(#soften)" />
+      <ellipse cx="132" cy="216" rx="48" ry="30" fill="url(#eyeGlow)" />
+      <ellipse cx="268" cy="216" rx="48" ry="30" fill="url(#eyeGlow)" />
+      <path d="M118 336 Q200 452 282 336 Q200 392 118 336 Z" fill="#160000" />
+      <path d="M118 336 Q200 452 282 336" stroke="#c1121f" stroke-width="3" fill="none" />
+      <g fill="#e8e3d9" opacity="0.85">
+        <path d="M146 344 l14 26 l14 -26 z" />
+        <path d="M180 352 l14 30 l14 -30 z" />
+        <path d="M214 352 l14 30 l14 -30 z" />
+        <path d="M248 344 l14 26 l14 -26 z" />
+      </g>
+    </svg>
+    <p class="scare__text">BEHIND YOU</p>
+  </div>
+
+  <div class="reveal" id="reveal" hidden>
+    <p class="reveal__emoji" aria-hidden="true">😂</p>
+    <h2 class="reveal__title">GOT YOU!</h2>
+    <p class="reveal__text">
+      Relax — it's fake. No ghosts, no cursed tapes, just JavaScript and a very
+      rude sound effect. Go check on your friend.
+    </p>
+    <div class="reveal__actions">
+      <button class="btn btn--blood" id="againBtn" type="button">Prank Someone Else</button>
+      <a class="btn btn--ghost" href="stories.html">Read The Stories</a>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/prank.js"></script>
+</body>
+</html>

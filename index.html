@@ -1,0 +1,124 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Astagfar Counter</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">الله</div>
+        <div>
+          <h1>Astagfar Counter</h1>
+          <p class="sub" id="todayLine">Aaj: 0 • Kul: 0</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="miniBtn" class="ghost" type="button" title="Always-on-top mini window">Mini</button>
+        <button id="settingsBtn" class="ghost" type="button" title="Settings">⚙</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card counter">
+        <p class="ar" id="activeAr">أَسْتَغْفِرُ اللّٰهَ</p>
+        <p class="tr" id="activeTr">Astaghfirullah</p>
+        <button id="tapBtn" class="tap" type="button" aria-label="Count">
+          <span id="activeCount">0</span>
+        </button>
+        <p class="hint" id="keyHint">Key: A</p>
+        <div class="row">
+          <button id="minusBtn" class="ghost" type="button">−1</button>
+          <button id="resetActiveBtn" class="ghost" type="button">Reset line</button>
+        </div>
+        <p class="note">
+          Gol button tap karein ya keyboard key dabayein. <b>Mini</b> window always-on-top rehti hai,
+          is liye doosri tab ya app use karte waqt bhi counting chalti rehti hai.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Astagfar lines</h2>
+        <ul id="list" class="list"></ul>
+        <form id="addForm" class="add">
+          <input id="newAr" type="text" placeholder="عربي متن (e.g. أستغفر الله)" autocomplete="off" />
+          <input id="newTr" type="text" placeholder="Transliteration / tarjuma (optional)" autocomplete="off" />
+          <button type="submit" class="primary">Add line</button>
+        </form>
+      </section>
+
+      <section class="card" id="settingsPanel" hidden>
+        <h2>Settings</h2>
+
+        <div class="field">
+          <label>Counting key / key set</label>
+          <div class="keyrow">
+            <div id="hotkeyBox" class="keybox">A</div>
+            <button id="setKeyBtn" class="ghost" type="button">Set key</button>
+            <button id="clearKeyBtn" class="ghost" type="button">Clear</button>
+          </div>
+          <p class="note">
+            Set key dabayein, phir 1 se 6 keys press karein (jaise <b>a s d f g h</b>).
+            Wohi order mein dabane par ek count hoga. Rukne par khud save ho jata hai.
+          </p>
+        </div>
+
+        <div class="field">
+          <label class="check"><input id="reminderEnabled" type="checkbox" /> Har hour reminder</label>
+          <div class="keyrow">
+            <input id="reminderMinutes" type="number" min="1" max="720" step="1" />
+            <span class="note">minute ka gap (60 = 1 hour)</span>
+          </div>
+          <div class="keyrow" style="margin-top:8px">
+            <button id="testReminderBtn" class="ghost" type="button">Test reminder</button>
+            <button id="notifyBtn" class="ghost" type="button">Enable notifications</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="check"><input id="soundEnabled" type="checkbox" /> Chhoti click sound</label>
+        </div>
+
+        <div class="field">
+          <button id="resetAllBtn" class="danger" type="button">Sab data reset karein</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="recordOverlay" class="overlay">
+    <div class="modal">
+      <h3>Set counting key</h3>
+      <p class="note">
+        1 se 6 keys press karein (rukne par khud save). Enter = save, Esc = cancel,
+        Backspace = undo.
+      </p>
+      <div id="recordBox" class="recordbox">...</div>
+      <div class="row">
+        <button id="recordSaveBtn" class="primary" type="button">Save</button>
+        <button id="recordCancelBtn" class="ghost" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="reminderOverlay" class="overlay">
+    <div class="modal">
+      <h3>Waqt ho gaya — Astagfar</h3>
+      <p id="reminderText" class="ar big">أَسْتَغْفِرُ اللّٰهَ</p>
+      <div class="row">
+        <button id="reminderCountBtn" class="primary" type="button">+1 karein</button>
+        <button id="reminderCloseBtn" class="ghost" type="button">Band karein</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

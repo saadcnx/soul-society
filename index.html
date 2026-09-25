@@ -1,1 +1,552 @@
+html
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#06170f" />
+  <meta name="description" content="استغفار کاؤنٹر — اپنے روزانہ استغفار کا شمار آسانی سے رکھیں" />
+  <title>استغفار کاؤنٹر</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
 
+    :root {
+      --bg: #06170f;
+      --bg-2: #0c2b1e;
+      --text: #ecf6f0;
+      --muted: #92b4a4;
+      --line: rgba(255, 255, 255, 0.12);
+      --card: rgba(255, 255, 255, 0.05);
+      --gold: #e3c060;
+      --green: #35d39a;
+      --red: #ef7a7a;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+      font-family: "Segoe UI", "Jameel Noori Nastaleeq", Tahoma, "Noto Naskh Arabic", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 520px at 50% -12%, #14503a 0%, rgba(20, 80, 58, 0) 62%),
+        linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+      background-attachment: fixed;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .app {
+      width: min(430px, 100%);
+      display: grid;
+      gap: 18px;
+      padding: 22px 18px 26px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+      box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.9);
+    }
+
+    .header {
+      text-align: center;
+      display: grid;
+      gap: 8px;
+    }
+
+    .header__title {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .header__dhikr {
+      margin: 0;
+      font-size: 1.4rem;
+      line-height: 2;
+      color: var(--gold);
+      text-shadow: 0 0 18px rgba(227, 192, 96, 0.25);
+    }
+
+    .header__hint {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat {
+      display: grid;
+      gap: 4px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+      text-align: center;
+    }
+
+    .stat__label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .stat__value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--green);
+    }
+
+    .counter {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+    }
+
+    .tap {
+      position: relative;
+      width: min(250px, 66vw);
+      aspect-ratio: 1;
+      display: grid;
+      place-content: center;
+      gap: 6px;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--text);
+      font: inherit;
+      background: radial-gradient(circle at 32% 26%, #1f7454, #0a3021 72%);
+      box-shadow:
+        0 0 0 1px rgba(227, 192, 96, 0.35),
+        0 0 0 12px rgba(227, 192, 96, 0.06),
+        0 26px 45px -20px rgba(0, 0, 0, 0.95),
+        inset 0 2px 14px rgba(255, 255, 255, 0.08);
+      transition: transform 0.12s ease, box-shadow 0.2s ease;
+    }
+
+    .tap:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 6px;
+    }
+
+    .tap:active { transform: scale(0.96); }
+
+    .tap__ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .tap__count {
+      font-size: clamp(3rem, 15vw, 4.25rem);
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 26px rgba(53, 211, 154, 0.45);
+    }
+
+    .tap__hint {
+      font-size: 0.82rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .tap.is-tick .tap__ring { animation: ring 0.45s ease-out; }
+    .tap.is-tick .tap__count { animation: pop 0.24s ease-out; }
+
+    @keyframes ring {
+      from { opacity: 0.85; transform: scale(1); }
+      to   { opacity: 0; transform: scale(1.28); }
+    }
+
+    @keyframes pop {
+      0%   { transform: scale(1); }
+      45%  { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+
+    .progress {
+      width: 100%;
+      display: grid;
+      gap: 8px;
+    }
+
+    .progress__track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .progress__bar {
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--green), var(--gold));
+      box-shadow: 0 0 18px rgba(53, 211, 154, 0.4);
+      transition: width 0.25s ease;
+    }
+
+    .progress__text {
+      margin: 0;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .field {
+      flex: 1 1 120px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .field__label {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    select:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    .btn {
+      flex: 1 1 110px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.12s ease;
+    }
+
+    .btn:hover { background: rgba(255, 255, 255, 0.12); }
+    .btn:active { transform: scale(0.97); }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    .btn--danger { color: var(--red); }
+
+    .toast {
+      position: fixed;
+      inset-inline: 0;
+      bottom: calc(22px + env(safe-area-inset-bottom));
+      margin: 0 auto;
+      width: max-content;
+      max-width: 88vw;
+      padding: 11px 18px;
+      border: 1px solid rgba(227, 192, 96, 0.35);
+      border-radius: 999px;
+      background: rgba(10, 40, 29, 0.95);
+      color: var(--text);
+      font-size: 0.88rem;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1 class="header__title">استغفار کاؤنٹر</h1>
+      <p class="header__dhikr">أَسْتَغْفِرُ اللّٰهَ رَبِّي مِنْ كُلِّ ذَنْبٍ</p>
+      <p class="header__hint">دائرے پر دبائیں یا اسپیس بار استعمال کریں</p>
+    </header>
+
+    <section class="stats" aria-label="اعداد و شمار">
+      <div class="stat">
+        <span class="stat__label">آج کا شمار</span>
+        <span class="stat__value" id="today">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat__label">کل مجموعہ</span>
+        <span class="stat__value" id="total">0</span>
+      </div>
+    </section>
+
+    <section class="counter">
+      <button type="button" class="tap" id="tap" aria-label="استغفار شمار کریں">
+        <span class="tap__ring" aria-hidden="true"></span>
+        <span class="tap__count" id="count">0</span>
+        <span class="tap__hint">دبائیں</span>
+      </button>
+
+      <div class="progress">
+        <div class="progress__track">
+          <div class="progress__bar" id="bar"></div>
+        </div>
+        <p class="progress__text">
+          <span id="done">0</span> / <span id="goal">100</span> استغفار
+        </p>
+      </div>
+    </section>
+
+    <section class="controls">
+      <label class="field">
+        <span class="field__label">ہدف</span>
+        <select id="target">
+          <option value="33">33</option>
+          <option value="100" selected>100</option>
+          <option value="300">300</option>
+          <option value="1000">1000</option>
+          <option value="5000">5000</option>
+        </select>
+      </label>
+      <button type="button" class="btn" id="resetDay">آج کا ری سیٹ</button>
+      <button type="button" class="btn btn--danger" id="resetAll">سب صاف کریں</button>
+    </section>
+  </main>
+
+  <p class="toast" id="toast" role="status" aria-live="polite"></p>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "astaghfar.counter.v1";
+
+      var el = {
+        count: document.getElementById("count"),
+        today: document.getElementById("today"),
+        total: document.getElementById("total"),
+        tap: document.getElementById("tap"),
+        bar: document.getElementById("bar"),
+        done: document.getElementById("done"),
+        goal: document.getElementById("goal"),
+        target: document.getElementById("target"),
+        resetDay: document.getElementById("resetDay"),
+        resetAll: document.getElementById("resetAll"),
+        toast: document.getElementById("toast")
+      };
+
+      function dayKey() {
+        var d = new Date();
+        var month = String(d.getMonth() + 1).padStart(2, "0");
+        var day = String(d.getDate()).padStart(2, "0");
+        return d.getFullYear() + "-" + month + "-" + day;
+      }
+
+      function defaults() {
+        return { count: 0, total: 0, target: 100, day: dayKey() };
+      }
+
+      function load() {
+        var fallback = defaults();
+        var raw = null;
+        try {
+          raw = window.localStorage.getItem(STORAGE_KEY);
+        } catch (err) {
+          return fallback;
+        }
+        if (!raw) return fallback;
+
+        var parsed;
+        try {
+          parsed = JSON.parse(raw);
+        } catch (err) {
+          return fallback;
+        }
+        if (!parsed || typeof parsed !== "object") return fallback;
+
+        var state = {
+          count: Number(parsed.count) >= 0 ? Math.floor(Number(parsed.count)) : 0,
+          total: Number(parsed.total) >= 0 ? Math.floor(Number(parsed.total)) : 0,
+          target: Number(parsed.target) > 0 ? Math.floor(Number(parsed.target)) : 100,
+          day: typeof parsed.day === "string" ? parsed.day : dayKey()
+        };
+
+        if (state.day !== dayKey()) {
+          state.day = dayKey();
+          state.count = 0;
+        }
+        return state;
+      }
+
+      function save() {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (err) {
+          /* اسٹوریج دستیاب نہیں — ایپ پھر بھی چلے گی */
+        }
+      }
+
+      var state = load();
+
+      function render() {
+        el.count.textContent = state.count;
+        el.today.textContent = state.count;
+        el.total.textContent = state.total;
+        el.done.textContent = state.count;
+        el.goal.textContent = state.target;
+
+        var percent = Math.min(100, (state.count / state.target) * 100);
+        el.bar.style.width = percent + "%";
+
+        if (el.target.value !== String(state.target)) {
+          el.target.value = String(state.target);
+        }
+      }
+
+      var toastTimer = 0;
+
+      function toast(message) {
+        el.toast.textContent = message;
+        el.toast.classList.add("is-visible");
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(function () {
+          el.toast.classList.remove("is-visible");
+        }, 2200);
+      }
+
+      function vibrate(pattern) {
+        if (typeof navigator.vibrate === "function") {
+          try {
+            navigator.vibrate(pattern);
+          } catch (err) {
+            /* وائبریشن سپورٹ نہیں */
+          }
+        }
+      }
+
+      function pulse() {
+        el.tap.classList.remove("is-tick");
+        void el.tap.offsetWidth;
+        el.tap.classList.add("is-tick");
+      }
+
+      el.tap.addEventListener("animationend", function (event) {
+        if (event.animationName === "pop") {
+          el.tap.classList.remove("is-tick");
+        }
+      });
+
+      function tick() {
+        state.count += 1;
+        state.total += 1;
+        save();
+        render();
+        pulse();
+        vibrate(12);
+
+        if (state.count === state.target) {
+          toast("ماشاءاللہ! ہدف مکمل ہو گیا ✨");
+          vibrate([40, 60, 40, 60, 90]);
+        }
+      }
+
+      el.tap.addEventListener("click", tick);
+
+      document.addEventListener("keydown", function (event) {
+        if (event.repeat) return;
+
+        var isSpace = event.code === "Space" || event.key === " ";
+        var isEnter = event.code === "Enter" || event.key === "Enter";
+        if (!isSpace && !isEnter) return;
+
+        var active = document.activeElement;
+        var tag = active && active.tagName ? active.tagName : "";
+        if (tag === "BUTTON" || tag === "SELECT" || tag === "INPUT" || tag === "TEXTAREA") return;
+
+        event.preventDefault();
+        tick();
+      });
+
+      el.target.addEventListener("change", function () {
+        var value = Math.floor(Number(el.target.value));
+        if (!Number.isFinite(value) || value <= 0) {
+          el.target.value = String(state.target);
+          return;
+        }
+        state.target = value;
+        save();
+        render();
+      });
+
+      el.resetDay.addEventListener("click", function () {
+        if (state.count === 0) {
+          toast("آج کا شمار پہلے ہی صفر ہے");
+          return;
+        }
+        if (!window.confirm("آج کا شمار صفر کر دیں؟ (کل مجموعہ محفوظ رہے گا)")) return;
+        state.count = 0;
+        save();
+        render();
+        toast("آج کا شمار صفر کر دیا گیا");
+      });
+
+      el.resetAll.addEventListener("click", function () {
+        if (!window.confirm("آج کا شمار اور کل مجموعہ دونوں صفر کر دیں؟")) return;
+        state.count = 0;
+        state.total = 0;
+        save();
+        render();
+        toast("سب کچھ صفر کر دیا گیا");
+      });
+
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState !== "visible") return;
+        if (state.day === dayKey()) return;
+        state.day = dayKey();
+        state.count = 0;
+        save();
+        render();
+        toast("نیا دن شروع — آج کا شمار صفر سے");
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

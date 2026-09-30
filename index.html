@@ -44,9 +44,8 @@
     min-width: 92px;
     padding: 8px 14px;
     border-radius: 12px;
-    background: rgba(18, 30, 48, 0.72);
+    background: rgba(18, 30, 48, 0.85);
     border: 1px solid rgba(120, 170, 255, 0.18);
-    backdrop-filter: blur(6px);
     transition: border-color 0.2s ease;
   }
   .chip .label {
@@ -198,7 +197,10 @@
 
   let W = 0;
   let H = 0;
+  let DPR = 1;
   let vignette = null;
+  let bgCanvas = null;
+  let bgCtx = null;
 
   /* =========================================================
      State
@@ -268,7 +270,8 @@
      Canvas sizing
      ========================================================= */
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    DPR = dpr;
     W = window.innerWidth;
     H = window.innerHeight;
 
@@ -283,6 +286,33 @@
     vignette = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.25, W / 2, H / 2, Math.max(W, H) * 0.78);
     vignette.addColorStop(0, "rgba(0,0,0,0)");
     vignette.addColorStop(1, "rgba(0,0,0,0.55)");
+
+    // Pre-render static background (grid + vignette) once per resize
+    bgCanvas = document.createElement("canvas");
+    bgCanvas.width = canvas.width;
+    bgCanvas.height = canvas.height;
+    bgCtx = bgCanvas.getContext("2d");
+    bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    bgCtx.fillStyle = "#0b0f17";
+    bgCtx.fillRect(0, 0, W, H);
+
+    const gap = 64;
+    bgCtx.lineWidth = 1;
+    bgCtx.strokeStyle = "rgba(120, 170, 255, 0.055)";
+    bgCtx.beginPath();
+    for (let x = 0.5; x <= W; x += gap) {
+      bgCtx.moveTo(x, 0);
+      bgCtx.lineTo(x, H);
+    }
+    for (let y = 0.5; y <= H; y += gap) {
+      bgCtx.moveTo(0, y);
+      bgCtx.lineTo(W, y);
+    }
+    bgCtx.stroke();
+
+    bgCtx.fillStyle = vignette;
+    bgCtx.fillRect(0, 0, W, H);
 
     // keep targets inside the new bounds
     for (const t of state.targets) {
@@ -351,7 +381,7 @@
      Effects
      ========================================================= */
   function burst(x, y, r) {
-    const count = 16;
+    const count = 8;
     for (let i = 0; i < count; i++) {
       const a = (i / count) * Math.PI * 2 + rand(-0.2, 0.2);
       const speed = rand(90, 260);
@@ -573,25 +603,10 @@
      Render
      ========================================================= */
   function drawBackground() {
-    ctx.fillStyle = "#0b0f17";
-    ctx.fillRect(0, 0, W, H);
-
-    const gap = 64;
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(120, 170, 255, 0.055)";
-    ctx.beginPath();
-    for (let x = 0.5; x <= W; x += gap) {
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, H);
-    }
-    for (let y = 0.5; y <= H; y += gap) {
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-    }
-    ctx.stroke();
-
-    if (vignette) {
-      ctx.fillStyle = vignette;
+    if (bgCanvas) {
+      ctx.drawImage(bgCanvas, 0, 0, W, H);
+    } else {
+      ctx.fillStyle = "#0b0f17";
       ctx.fillRect(0, 0, W, H);
     }
   }
@@ -623,10 +638,6 @@
       ctx.translate(t.x, t.y);
       ctx.scale(pulse, pulse);
 
-      // soft glow
-      ctx.shadowColor = "rgba(79, 209, 255, 0.75)";
-      ctx.shadowBlur = 20;
-
       // body
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
@@ -637,8 +648,6 @@
       ctx.lineWidth = 3;
       ctx.strokeStyle = "#4fd1ff";
       ctx.stroke();
-
-      ctx.shadowBlur = 0;
 
       // middle ring
       ctx.beginPath();
@@ -700,8 +709,6 @@
     const len = 11;
     ctx.lineWidth = 2;
     ctx.strokeStyle = "#7cf7c4";
-    ctx.shadowColor = "rgba(124, 247, 196, 0.85)";
-    ctx.shadowBlur = 10;
 
     ctx.beginPath();
     ctx.moveTo(0, -gap); ctx.lineTo(0, -gap - len);
@@ -711,7 +718,6 @@
     ctx.stroke();
 
     // center dot
-    ctx.shadowBlur = 0;
     ctx.beginPath();
     ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
@@ -721,9 +727,7 @@
   }
 
   function render() {
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
     drawBackground();
 

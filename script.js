@@ -71,22 +71,86 @@ function render(animate = false) {
 
 /* ---------- Feedback ---------- */
 let audioCtx = null;
+let audioBus = null;
+
+function ensureAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const master = audioCtx.createGain();
+    master.gain.value = 0.9;
+
+    const reverb = audioCtx.createConvolver();
+    const len = audioCtx.sampleRate * 1.6;
+    const impulse = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const ch = impulse.getChannelData(c);
+      for (let i = 0; i < len; i++) {
+        ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+      }
+    }
+    reverb.buffer = impulse;
+
+    const wet = audioCtx.createGain();
+    wet.gain.value = 0.35;
+    const dry = audioCtx.createGain();
+    dry.gain.value = 0.85;
+
+    master.connect(dry).connect(audioCtx.destination);
+    master.connect(reverb).connect(wet).connect(audioCtx.destination);
+
+    audioBus = master;
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+}
+
+/* Soft temple-bell chime: warm harmonics with gentle decay */
+const CHIME_NOTES = [523.25, 587.33, 659.25, 698.46, 783.99, 880.0];
 
 function playTick() {
   if (!state.soundOn) return;
   try {
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.08);
-    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18);
-    osc.connect(gain).connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.2);
+    ensureAudio();
+    const ctx = audioCtx;
+    const now = ctx.currentTime;
+
+    const base = CHIME_NOTES[state.count % CHIME_NOTES.length];
+
+    // Partial frequencies for a soft bell-like timbre
+    const partials = [
+      { ratio: 1.0, gain: 0.35, decay: 0.9 },
+      { ratio: 2.0, gain: 0.12, decay: 0.7 },
+      { ratio: 2.76, gain: 0.06, decay: 0.55 },
+      { ratio: 4.07, gain: 0.035, decay: 0.45 },
+      { ratio: 5.43, gain: 0.02, decay: 0.35 },
+    ];
+
+    partials.forEach((p) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = base * p.ratio;
+
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(p.gain, now + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + p.decay);
+
+      osc.connect(g).connect(audioBus);
+      osc.start(now);
+      osc.stop(now + p.decay + 0.05);
+    });
+
+    // Subtle airy shimmer
+    const shimmer = ctx.createOscillator();
+    const shimmerGain = ctx.createGain();
+    shimmer.type = "triangle";
+    shimmer.frequency.value = base * 8;
+    shimmerGain.gain.setValueAtTime(0.0001, now);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.012, now + 0.005);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+    shimmer.connect(shimmerGain).connect(audioBus);
+    shimmer.start(now);
+    shimmer.stop(now + 0.25);
   } catch {
     /* audio not available */
   }

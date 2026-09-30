@@ -156,6 +156,36 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+/* ---------- Tabs ---------- */
+const tabs = Array.from(document.querySelectorAll(".tab"));
+const panels = Array.from(document.querySelectorAll(".tab-panel"));
+
+function activateTab(name) {
+  tabs.forEach((tab) => {
+    const active = tab.dataset.tab === name;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", String(active));
+  });
+  panels.forEach((panel) => {
+    const active = panel.id === `panel-${name}`;
+    panel.classList.toggle("is-active", active);
+    panel.hidden = !active;
+  });
+}
+
+tabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => activateTab(tab.dataset.tab));
+  tab.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      const dir = e.key === "ArrowRight" ? 1 : -1;
+      const next = tabs[(index + dir + tabs.length) % tabs.length];
+      next.focus();
+      activateTab(next.dataset.tab);
+    }
+  });
+});
+
 /* ---------- Init ---------- */
 load();
 render();

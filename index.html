@@ -3,220 +3,183 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Aim Trainer — Arm Practice</title>
+<title>Aim Trainer</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { height: 100%; overflow: hidden; background: #14120c; }
   body {
     font-family: "Segoe UI", Roboto, Arial, sans-serif;
     color: #e8dcc0;
-    letter-spacing: 0.02em;
-    -webkit-user-select: none;
     user-select: none;
+    -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
 
   #game {
     position: fixed;
     inset: 0;
+    width: 100%; height: 100%;
     display: block;
-    width: 100%;
-    height: 100%;
     cursor: none;
     touch-action: none;
   }
 
-  /* ---------- HUD ---------- */
   .hud {
     position: fixed;
     top: 0; left: 0; right: 0;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
+    display: flex; gap: 10px;
+    justify-content: center; flex-wrap: wrap;
     padding: 14px;
     pointer-events: none;
     z-index: 5;
   }
   .chip {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 92px;
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 90px;
     padding: 8px 14px;
     border-radius: 4px;
     background: rgba(28, 24, 16, 0.88);
     border: 1px solid rgba(230, 170, 60, 0.4);
-    box-shadow: inset 0 0 12px rgba(255, 150, 30, 0.06);
-    transition: border-color 0.2s ease;
   }
   .chip .label {
-    font-size: 10px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: #a08d5e;
-    font-weight: 600;
+    font-size: 10px; letter-spacing: 0.24em;
+    text-transform: uppercase; color: #a08d5e; font-weight: 600;
   }
   .chip .value {
-    font-size: 22px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: #ffb347;
-    line-height: 1.25;
+    font-size: 22px; font-weight: 700;
     font-family: ui-monospace, "Courier New", monospace;
-    text-shadow: 0 0 8px rgba(255, 150, 30, 0.35);
+    color: #ffb347; line-height: 1.25;
   }
-  .chip .value.hot { color: #ffe27a; text-shadow: 0 0 10px rgba(255, 210, 80, 0.5); }
-  .chip .value.warn { color: #ff5c33; text-shadow: 0 0 10px rgba(255, 60, 30, 0.5); }
+  .chip .value.hot { color: #ffe27a; }
+  .chip .value.warn { color: #ff5c33; }
 
-  /* ---------- Overlay ---------- */
   .overlay {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    background: radial-gradient(circle at 50% 45%, rgba(20, 18, 12, 0.82), rgba(10, 9, 6, 0.97));
+    position: fixed; inset: 0;
+    display: grid; place-items: center;
+    background: rgba(10, 9, 6, 0.94);
     z-index: 10;
-    transition: opacity 0.25s ease;
+    cursor: default;
   }
-  .overlay.hidden { opacity: 0; pointer-events: none; }
+  .overlay.hidden { display: none; }
 
   .panel {
-    width: min(480px, 90vw);
-    padding: 28px 26px;
+    width: min(560px, 92vw);
+    padding: 26px 24px;
+    background: rgba(22, 19, 13, 0.98);
+    border: 1px solid rgba(230, 170, 60, 0.35);
     border-radius: 6px;
     text-align: center;
-    background: rgba(22, 19, 13, 0.96);
-    border: 1px solid rgba(230, 170, 60, 0.35);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 0 40px rgba(255, 150, 30, 0.04);
   }
   .panel h1 {
-    font-size: 28px;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    color: #ffb347;
-    font-weight: 800;
-    text-shadow: 0 0 20px rgba(255, 150, 30, 0.5);
+    font-size: 24px; letter-spacing: 0.28em;
+    text-transform: uppercase; margin-bottom: 18px;
+    color: #ffb347; font-weight: 800;
   }
   .panel p {
-    font-size: 14px;
-    line-height: 1.75;
-    color: #c9b98a;
-    margin-bottom: 8px;
+    font-size: 14px; line-height: 1.7;
+    color: #c9b98a; margin-bottom: 10px;
   }
   .panel .hint {
-    font-size: 12px;
-    color: #8a7d5c;
-    margin-bottom: 20px;
-    letter-spacing: 0.05em;
+    font-size: 12px; color: #8a7d5c;
+    margin-bottom: 18px; letter-spacing: 0.05em;
   }
-  .panel .hint b { color: #ffb347; font-weight: 700; }
+  .panel .hint b { color: #ffb347; }
+
+  .mode-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 20px;
+  }
+  .mode-card {
+    appearance: none; cursor: pointer; font: inherit;
+    text-align: left; padding: 14px 16px;
+    background: rgba(255, 180, 70, 0.04);
+    border: 1px solid rgba(230, 170, 60, 0.25);
+    border-radius: 4px; color: #e8dcc0;
+  }
+  .mode-card:hover {
+    background: rgba(255, 180, 70, 0.12);
+    border-color: rgba(230, 170, 60, 0.6);
+  }
+  .mode-card:active { transform: scale(0.99); }
+  .mode-card .mode-name {
+    display: block; font-size: 14px; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: #ffb347; margin-bottom: 4px;
+  }
+  .mode-card .mode-desc {
+    display: block; font-size: 12px;
+    color: #a08d5e; line-height: 1.4;
+  }
 
   .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin: 18px 0 22px;
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 8px; margin: 16px 0 22px;
   }
   .stats-grid .cell {
     background: rgba(255, 180, 70, 0.05);
     border: 1px solid rgba(230, 170, 60, 0.2);
-    border-radius: 4px;
-    padding: 10px 8px;
+    border-radius: 4px; padding: 10px 8px;
   }
   .stats-grid .cell span {
-    display: block;
-    font-size: 10px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: #a08d5e;
-    margin-bottom: 4px;
-    font-weight: 600;
+    display: block; font-size: 10px; letter-spacing: 0.24em;
+    text-transform: uppercase; color: #a08d5e;
+    margin-bottom: 4px; font-weight: 600;
   }
   .stats-grid .cell strong {
     font-size: 22px;
-    font-variant-numeric: tabular-nums;
-    color: #ffb347;
     font-family: ui-monospace, "Courier New", monospace;
+    color: #ffb347;
   }
 
   .slider-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    margin: 0 0 20px;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; margin-bottom: 16px;
     background: rgba(255, 180, 70, 0.05);
     border: 1px solid rgba(230, 170, 60, 0.2);
     border-radius: 4px;
   }
   .slider-row label {
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #a08d5e;
-    font-weight: 700;
-    flex: 0 0 auto;
+    font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: #a08d5e;
+    font-weight: 700; flex: 0 0 auto;
   }
   .slider-row input[type="range"] {
-    flex: 1;
-    appearance: none;
-    -webkit-appearance: none;
-    height: 4px;
-    background: rgba(230, 170, 60, 0.25);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
+    flex: 1; appearance: none; -webkit-appearance: none;
+    height: 4px; background: rgba(230, 170, 60, 0.25);
+    border-radius: 2px; outline: none; cursor: pointer;
   }
   .slider-row input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: #ffb347;
-    border: 2px solid #1a1000;
-    box-shadow: 0 0 10px rgba(255, 150, 30, 0.7);
-    cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #ffb347; border: 2px solid #1a1000; cursor: pointer;
   }
   .slider-row input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #ffb347;
-    border: 2px solid #1a1000;
-    box-shadow: 0 0 10px rgba(255, 150, 30, 0.7);
-    cursor: pointer;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #ffb347; border: 2px solid #1a1000; cursor: pointer;
   }
   .slider-row #sensValue {
-    flex: 0 0 auto;
-    min-width: 52px;
-    text-align: right;
+    flex: 0 0 auto; min-width: 52px; text-align: right;
     font-family: ui-monospace, "Courier New", monospace;
-    font-size: 13px;
-    color: #ffb347;
-    font-weight: 700;
+    font-size: 13px; color: #ffb347; font-weight: 700;
   }
 
+  .btn-row { display: flex; gap: 10px; justify-content: center; }
+
   .btn {
-    appearance: none;
+    appearance: none; cursor: pointer; font: inherit;
+    font-weight: 800; font-size: 14px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    padding: 12px 30px; border-radius: 4px;
+    color: #1a1000; background: #ffb347;
     border: 1px solid rgba(255, 200, 100, 0.5);
-    cursor: pointer;
-    font: inherit;
-    font-weight: 800;
-    font-size: 15px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    padding: 13px 42px;
-    border-radius: 4px;
-    color: #1a1000;
-    background: linear-gradient(135deg, #ffc46b, #ff8c1a);
-    box-shadow: 0 10px 30px rgba(255, 140, 26, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    transition: transform 0.12s ease, box-shadow 0.2s ease;
   }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(255, 140, 26, 0.5); }
-  .btn:active { transform: translateY(0) scale(0.98); }
+  .btn:hover { background: #ffc46b; }
+  .btn:active { transform: scale(0.98); }
+  .btn.ghost {
+    background: transparent; color: #ffb347;
+    border-color: rgba(230, 170, 60, 0.35);
+  }
+  .btn.ghost:hover { background: rgba(255, 180, 70, 0.1); }
 </style>
 </head>
 <body>
@@ -224,662 +187,541 @@
 <canvas id="game"></canvas>
 
 <div class="hud">
+  <div class="chip"><span class="label">Mode</span><span class="value" id="hudMode" style="font-size:14px">—</span></div>
   <div class="chip"><span class="label">Time</span><span class="value" id="hudTime">60.0</span></div>
   <div class="chip"><span class="label">Score</span><span class="value" id="hudScore">0</span></div>
-  <div class="chip"><span class="label">Accuracy</span><span class="value" id="hudAcc">100%</span></div>
+  <div class="chip"><span class="label" id="hudAccLabel">Accuracy</span><span class="value" id="hudAcc">100%</span></div>
   <div class="chip"><span class="label">Streak</span><span class="value" id="hudStreak">0</span></div>
 </div>
 
 <div class="overlay" id="overlay">
-  <div class="panel" id="panel">
-    <h1>Aim Trainer</h1>
-    <p>Crosshair ko target par le jao aur <b>click</b> karo.</p>
-    <p class="hint">Mouse lock ho jayega — <b>ESC</b> se unlock / pause.</p>
-    <div class="slider-row">
-      <label for="sensSlider">Sens</label>
-      <input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="1" />
-      <span id="sensValue">1.00x</span>
-    </div>
-    <button class="btn" id="startBtn">Start</button>
-  </div>
+  <div class="panel" id="panel"></div>
 </div>
 
 <script>
-(() => {
+(function () {
   "use strict";
 
   /* =========================================================
-     Setup
+     DOM
      ========================================================= */
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
-
   const overlay = document.getElementById("overlay");
   const panel = document.getElementById("panel");
-  const startBtn = document.getElementById("startBtn");
 
+  const hudMode = document.getElementById("hudMode");
   const hudTime = document.getElementById("hudTime");
   const hudScore = document.getElementById("hudScore");
   const hudAcc = document.getElementById("hudAcc");
+  const hudAccLabel = document.getElementById("hudAccLabel");
   const hudStreak = document.getElementById("hudStreak");
 
-  const GAME_TIME = 60;        // seconds
-  const MAX_TARGETS = 3;       // simultaneous targets
+  /* =========================================================
+     Utils
+     ========================================================= */
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+  const nowMs = () => performance.now();
 
-  let W = 0;
-  let H = 0;
-  let DPR = 1;
-  let vignette = null;
-  let bgCanvas = null;
-  let bgCtx = null;
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
 
-  let sensitivity = 1.0;
+  /* =========================================================
+     Canvas
+     ========================================================= */
+  let W = 0, H = 0, DPR = 1;
+  let bgCanvas = null, bgCtx = null;
+
+  /* =========================================================
+     Aim
+     ========================================================= */
+  const raw = { x: 0, y: 0 };
+  const aim = { x: 0, y: 0 };
+  let sensitivity = 1;
   let pointerLocked = false;
-
-  const sensSlider = document.getElementById("sensSlider");
-  const sensValue = document.getElementById("sensValue");
 
   /* =========================================================
      State
      ========================================================= */
   const state = {
+    mode: null,
     running: false,
-    timeLeft: GAME_TIME,
+    timeLeft: 60,
     score: 0,
     hits: 0,
     shots: 0,
     streak: 0,
     bestStreak: 0,
     targets: [],
-    particles: [],
-    ripples: [],
-    shake: 0,
-    hitFlash: 0
+    hitFlash: 0,
+    modeData: {}
   };
 
-  const aim = { x: 0, y: 0 };   // smoothed crosshair
-  const raw = { x: 0, y: 0 };   // raw pointer
-
   /* =========================================================
-     Helpers
-     ========================================================= */
-  const rand = (min, max) => min + Math.random() * (max - min);
-  const clamp = (v, min, max) => (v < min ? min : v > max ? max : v);
-  const lerp = (a, b, t) => a + (b - a) * t;
-
-  function easeOutBack(x) {
-    const c1 = 1.70158;
-    const c3 = c1 + 1;
-    return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
-  }
-
-  /* =========================================================
-     Audio (tiny WebAudio blips)
+     Audio
      ========================================================= */
   let audioCtx = null;
-
   function initAudio() {
     if (audioCtx) return;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (AC) audioCtx = new AC();
   }
-
-  function beep(freq, dur, type = "sine", vol = 0.05) {
+  function beep(freq, dur, type, vol) {
     if (!audioCtx) return;
-    const now = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, now);
-    osc.frequency.exponentialRampToValueAtTime(Math.max(40, freq * 0.55), now + dur);
-
-    gain.gain.setValueAtTime(vol, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now);
-    osc.stop(now + dur + 0.02);
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type || "square";
+    o.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(vol || 0.04, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.02);
   }
 
   /* =========================================================
-     Canvas sizing
+     Resize + pre-rendered background
      ========================================================= */
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    DPR = dpr;
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
     W = window.innerWidth;
     H = window.innerHeight;
-
-    canvas.width = Math.floor(W * dpr);
-    canvas.height = Math.floor(H * dpr);
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
     canvas.style.width = W + "px";
     canvas.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    // cache vignette gradient
-    vignette = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.25, W / 2, H / 2, Math.max(W, H) * 0.78);
-    vignette.addColorStop(0, "rgba(0,0,0,0)");
-    vignette.addColorStop(1, "rgba(0,0,0,0.72)");
-
-    // Pre-render static background (grid + vignette) once per resize
+    // pre-render static background (grid + vignette) once
     bgCanvas = document.createElement("canvas");
     bgCanvas.width = canvas.width;
     bgCanvas.height = canvas.height;
     bgCtx = bgCanvas.getContext("2d");
-    bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    bgCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
     bgCtx.fillStyle = "#14120c";
     bgCtx.fillRect(0, 0, W, H);
 
-    const gap = 64;
+    const gap = 72;
+    bgCtx.strokeStyle = "rgba(230, 170, 60, 0.07)";
     bgCtx.lineWidth = 1;
-    bgCtx.strokeStyle = "rgba(230, 170, 60, 0.06)";
     bgCtx.beginPath();
-    for (let x = 0.5; x <= W; x += gap) {
-      bgCtx.moveTo(x, 0);
-      bgCtx.lineTo(x, H);
-    }
-    for (let y = 0.5; y <= H; y += gap) {
-      bgCtx.moveTo(0, y);
-      bgCtx.lineTo(W, y);
-    }
+    for (let x = 0.5; x <= W; x += gap) { bgCtx.moveTo(x, 0); bgCtx.lineTo(x, H); }
+    for (let y = 0.5; y <= H; y += gap) { bgCtx.moveTo(0, y); bgCtx.lineTo(W, y); }
     bgCtx.stroke();
 
-    bgCtx.fillStyle = vignette;
+    const grad = bgCtx.createRadialGradient(
+      W / 2, H / 2, Math.min(W, H) * 0.3,
+      W / 2, H / 2, Math.max(W, H) * 0.75
+    );
+    grad.addColorStop(0, "rgba(0,0,0,0)");
+    grad.addColorStop(1, "rgba(0,0,0,0.65)");
+    bgCtx.fillStyle = grad;
     bgCtx.fillRect(0, 0, W, H);
-
-    // keep targets inside the new bounds
-    for (const t of state.targets) {
-      const pad = t.r + 20;
-      t.x = clamp(t.x, pad, Math.max(pad, W - pad));
-      t.y = clamp(t.y, pad, Math.max(pad, H - pad));
-    }
 
     raw.x = clamp(raw.x || W / 2, 0, W);
     raw.y = clamp(raw.y || H / 2, 0, H);
-    aim.x = clamp(aim.x || W / 2, 0, W);
-    aim.y = clamp(aim.y || H / 2, 0, H);
+    aim.x = raw.x;
+    aim.y = raw.y;
   }
 
   /* =========================================================
-     Targets
+     Grid helper (gridshot)
      ========================================================= */
-  function difficulty() {
-    return clamp(1 - state.timeLeft / GAME_TIME, 0, 1); // 0 -> easy, 1 -> hard
-  }
+  function getGridCells(count) {
+    const cols = Math.ceil(Math.sqrt(count));
+    const rows = Math.ceil(count / cols);
+    const margin = 110;
+    const cellW = (W - margin * 2) / cols;
+    const cellH = (H - margin * 2) / rows;
+    const size = Math.min(cellW, cellH);
+    const r = clamp(size * 0.32, 22, 46);
 
-  function spawnTarget() {
-    const d = difficulty();
-    const pad = 90;
-    const minX = Math.min(pad, W / 2);
-    const minY = Math.min(pad, H / 2);
-
-    const r = lerp(48, 24, d) * rand(0.88, 1.12);
-    const maxLife = lerp(2.6, 1.15, d) * rand(0.9, 1.15);
-
-    let x = 0;
-    let y = 0;
-    let best = -1;
-
-    // try a few times to avoid spawning on top of an existing target
-    for (let attempt = 0; attempt < 12; attempt++) {
-      const cx = rand(minX, Math.max(minX + 1, W - minX));
-      const cy = rand(minY, Math.max(minY + 1, H - minY));
-      let closest = Infinity;
-      for (const t of state.targets) {
-        const dist = Math.hypot(cx - t.x, cy - t.y) - t.r;
-        if (dist < closest) closest = dist;
-      }
-      if (closest > best) {
-        best = closest;
-        x = cx;
-        y = cy;
-      }
-      if (best > r * 2.4) break;
-    }
-
-    state.targets.push({
-      x,
-      y,
-      r,
-      age: 0,
-      life: maxLife,
-      maxLife,
-      wobble: rand(0, Math.PI * 2),
-      driftX: rand(-9, 9),
-      driftY: rand(-9, 9)
-    });
-  }
-
-  /* =========================================================
-     Effects
-     ========================================================= */
-  function burst(x, y, r) {
-    const count = 8;
+    const cells = [];
     for (let i = 0; i < count; i++) {
-      const a = (i / count) * Math.PI * 2 + rand(-0.2, 0.2);
-      const speed = rand(90, 260);
-      state.particles.push({
-        x,
-        y,
-        vx: Math.cos(a) * speed,
-        vy: Math.sin(a) * speed,
-        size: rand(1.6, 3.6),
-        life: rand(0.28, 0.6),
-        maxLife: 0.6,
-        hue: Math.random() < 0.4 ? "#ffe27a" : "#ff8c1a"
+      const c = i % cols;
+      const row = Math.floor(i / cols);
+      cells.push({
+        x: margin + cellW * (c + 0.5),
+        y: margin + cellH * (row + 0.5),
+        r: r
       });
     }
-    state.ripples.push({ x, y, radius: r * 0.6, maxRadius: r * 2.6, life: 0.42, maxLife: 0.42 });
-    state.hitFlash = 1;
+    return cells;
   }
 
-  function missEffect(x, y) {
-    state.ripples.push({ x, y, radius: 2, maxRadius: 26, life: 0.26, maxLife: 0.26, bad: true });
+  function spawnRandomTarget(r) {
+    const pad = r + 80;
+    return { x: rand(pad, W - pad), y: rand(pad, H - pad), r: r };
+  }
+
+  /* =========================================================
+     MODES
+     ========================================================= */
+  const MODES = {
+    gridshot: {
+      name: "Gridshot",
+      desc: "4 targets in grid",
+      time: 60,
+      init() {
+        state.targets.length = 0;
+        const cells = getGridCells(9);
+        state.modeData = { cells: cells };
+        const idx = shuffle([0,1,2,3,4,5,6,7,8]).slice(0, 4);
+        for (const i of idx) {
+          state.targets.push({
+            x: cells[i].x, y: cells[i].y, r: cells[i].r, ci: i
+          });
+        }
+      },
+      onHit(t) {
+        state.score += 100;
+        state.targets.splice(state.targets.indexOf(t), 1);
+        const cells = state.modeData.cells;
+        const used = {};
+        for (const tt of state.targets) used[tt.ci] = true;
+        const empty = [];
+        for (let i = 0; i < cells.length; i++) if (!used[i]) empty.push(i);
+        if (empty.length) {
+          const c = empty[(Math.random() * empty.length) | 0];
+          state.targets.push({
+            x: cells[c].x, y: cells[c].y, r: cells[c].r, ci: c
+          });
+        }
+      },
+      onMiss() { state.score = Math.max(0, state.score - 20); },
+      tick() {},
+      draw(ctx) {
+        const cells = state.modeData.cells;
+        ctx.strokeStyle = "rgba(230, 170, 60, 0.1)";
+        ctx.lineWidth = 1;
+        for (const c of cells) {
+          ctx.beginPath();
+          ctx.arc(c.x, c.y, c.r + 8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+    },
+
+    flick: {
+      name: "Flick",
+      desc: "One target, anywhere",
+      time: 60,
+      init() {
+        state.targets.length = 0;
+        const r = clamp(Math.min(W, H) * 0.048, 22, 40);
+        state.targets.push(spawnRandomTarget(r));
+      },
+      onHit(t) {
+        state.streak++;
+        if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+        const bonus = Math.min(state.streak, 15) * 5;
+        state.score += 100 + bonus;
+        state.targets.splice(state.targets.indexOf(t), 1);
+        const r = clamp(Math.min(W, H) * 0.048, 22, 40);
+        state.targets.push(spawnRandomTarget(r));
+      },
+      onMiss() {
+        state.streak = 0;
+        state.score = Math.max(0, state.score - 20);
+      },
+      tick() {},
+      draw() {}
+    },
+
+    tracking: {
+      name: "Tracking",
+      desc: "Hold crosshair on target",
+      time: 30,
+      init() {
+        state.targets.length = 0;
+        const r = clamp(Math.min(W, H) * 0.055, 26, 46);
+        state.targets.push({
+          x: W / 2, y: H / 2, r: r,
+          vx: 220, vy: 170
+        });
+        state.modeData = { onTime: 0, totalTime: 0 };
+      },
+      onHit() {},
+      onMiss() {},
+      tick(dt) {
+        const t = state.targets[0];
+        if (!t) return;
+        t.x += t.vx * dt;
+        t.y += t.vy * dt;
+        const pad = t.r + 12;
+        if (t.x < pad) { t.x = pad; t.vx = Math.abs(t.vx); }
+        if (t.x > W - pad) { t.x = W - pad; t.vx = -Math.abs(t.vx); }
+        if (t.y < pad) { t.y = pad; t.vy = Math.abs(t.vy); }
+        if (t.y > H - pad) { t.y = H - pad; t.vy = -Math.abs(t.vy); }
+
+        const dx = aim.x - t.x;
+        const dy = aim.y - t.y;
+        const on = (dx * dx + dy * dy) <= t.r * t.r;
+
+        state.modeData.totalTime += dt;
+        if (on) {
+          state.modeData.onTime += dt;
+          state.score += dt * 200;
+        }
+      },
+      draw() {}
+    },
+
+    reaction: {
+      name: "Reaction",
+      desc: "Click the instant it appears",
+      time: 60,
+      init() {
+        state.targets.length = 0;
+        const r = clamp(Math.min(W, H) * 0.05, 24, 42);
+        state.targets.push({
+          x: W / 2, y: H / 2, r: r,
+          wait: rand(0.6, 1.6),
+          visible: false,
+          spawnTime: 0
+        });
+        state.modeData = { lastRT: 0, bestRT: Infinity, rtSum: 0, rtCount: 0 };
+      },
+      onHit(t) {
+        const rt = nowMs() - t.spawnTime;
+        state.modeData.lastRT = rt;
+        if (rt < state.modeData.bestRT) state.modeData.bestRT = rt;
+        state.modeData.rtSum += rt;
+        state.modeData.rtCount++;
+        state.score += Math.max(20, Math.round(500 - rt * 0.4));
+
+        t.wait = rand(0.6, 1.6);
+        t.visible = false;
+        const pad = t.r + 80;
+        t.x = rand(pad, W - pad);
+        t.y = rand(pad, H - pad);
+      },
+      onMiss() { state.score = Math.max(0, state.score - 30); },
+      tick(dt) {
+        const t = state.targets[0];
+        if (!t) return;
+        if (!t.visible) {
+          t.wait -= dt;
+          if (t.wait <= 0) {
+            t.visible = true;
+            t.spawnTime = nowMs();
+          }
+        }
+      },
+      draw() {}
+    }
+  };
+
+  /* =========================================================
+     HUD
+     ========================================================= */
+  function updateHud() {
+    hudTime.textContent = state.timeLeft.toFixed(1);
+    hudScore.textContent = Math.round(state.score);
+    hudStreak.textContent = state.streak;
+    hudTime.classList.toggle("warn", state.timeLeft <= 10);
+
+    if (!state.mode) return;
+
+    if (state.mode === "tracking") {
+      const d = state.modeData;
+      const pct = d.totalTime > 0 ? Math.round((d.onTime / d.totalTime) * 100) : 0;
+      hudAccLabel.textContent = "On Target";
+      hudAcc.textContent = pct + "%";
+      hudAcc.classList.toggle("hot", pct >= 70);
+    } else if (state.mode === "reaction") {
+      const d = state.modeData;
+      hudAccLabel.textContent = "Last RT";
+      hudAcc.textContent = d.lastRT > 0 ? Math.round(d.lastRT) + "ms" : "—";
+      hudAcc.classList.toggle("hot", d.lastRT > 0 && d.lastRT < 250);
+    } else {
+      const acc = state.shots > 0 ? Math.round((state.hits / state.shots) * 100) : 100;
+      hudAccLabel.textContent = "Accuracy";
+      hudAcc.textContent = acc + "%";
+      hudAcc.classList.toggle("hot", acc >= 80 && state.shots >= 5);
+    }
   }
 
   /* =========================================================
      Game flow
      ========================================================= */
-  function resetGame() {
-    state.timeLeft = GAME_TIME;
+  function resetGame(modeKey) {
+    const mode = MODES[modeKey];
+    state.mode = modeKey;
+    state.timeLeft = mode.time;
     state.score = 0;
     state.hits = 0;
     state.shots = 0;
     state.streak = 0;
     state.bestStreak = 0;
     state.targets.length = 0;
-    state.particles.length = 0;
-    state.ripples.length = 0;
-    state.shake = 0;
     state.hitFlash = 0;
+    state.modeData = {};
+    mode.init();
+    hudMode.textContent = mode.name;
     updateHud();
   }
 
-  function startGame() {
+  function startGame(modeKey) {
     initAudio();
-    resetGame();
-    raw.x = W / 2;
-    raw.y = H / 2;
-    aim.x = raw.x;
-    aim.y = raw.y;
+    resetGame(modeKey);
+    raw.x = W / 2; raw.y = H / 2;
+    aim.x = raw.x; aim.y = raw.y;
     state.running = true;
-    for (let i = 0; i < MAX_TARGETS; i++) spawnTarget();
     overlay.classList.add("hidden");
     requestPointerLock();
-    beep(520, 0.12, "triangle", 0.04);
+    beep(600, 0.1, "square", 0.04);
   }
 
   function endGame() {
     state.running = false;
-    state.targets.length = 0;
-
+    const mode = MODES[state.mode];
     const acc = state.shots > 0 ? Math.round((state.hits / state.shots) * 100) : 100;
 
+    let accLabel = "Accuracy";
+    let accValue = acc + "%";
+    if (state.mode === "tracking") {
+      const d = state.modeData;
+      accLabel = "On Target";
+      accValue = d.totalTime > 0
+        ? Math.round((d.onTime / d.totalTime) * 100) + "%"
+        : "0%";
+    } else if (state.mode === "reaction") {
+      const d = state.modeData;
+      accLabel = "Best RT";
+      accValue = d.bestRT === Infinity ? "—" : Math.round(d.bestRT) + "ms";
+    }
+
+    const extras = [];
+    if (state.mode === "reaction") {
+      const d = state.modeData;
+      const avg = d.rtCount > 0 ? Math.round(d.rtSum / d.rtCount) : 0;
+      extras.push('<div class="cell"><span>Avg RT</span><strong>' + avg + 'ms</strong></div>');
+      extras.push('<div class="cell"><span>Hits</span><strong>' + d.rtCount + '</strong></div>');
+    } else {
+      extras.push('<div class="cell"><span>Hits</span><strong>' + state.hits + '</strong></div>');
+      extras.push('<div class="cell"><span>Shots</span><strong>' + state.shots + '</strong></div>');
+    }
+
     panel.innerHTML =
-      '<h1>Time Up!</h1>' +
+      '<h1>' + mode.name + ' — Done</h1>' +
       '<div class="stats-grid">' +
-        '<div class="cell"><span>Score</span><strong>' + state.score + "</strong></div>" +
-        '<div class="cell"><span>Accuracy</span><strong>' + acc + "%</strong></div>" +
-        '<div class="cell"><span>Hits</span><strong>' + state.hits + "</strong></div>" +
-        '<div class="cell"><span>Best Streak</span><strong>' + state.bestStreak + "</strong></div>" +
-      "</div>" +
+        '<div class="cell"><span>Score</span><strong>' + Math.round(state.score) + '</strong></div>' +
+        '<div class="cell"><span>' + accLabel + '</span><strong>' + accValue + '</strong></div>' +
+        extras.join("") +
+      '</div>' +
       '<div class="slider-row">' +
         '<label for="sensSlider">Sens</label>' +
         '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
-        '<span id="sensValue">' + sensitivity.toFixed(2) + "x</span>" +
-      "</div>" +
-      '<button class="btn" id="startBtn">Play Again</button>';
+        '<span id="sensValue">' + sensitivity.toFixed(2) + 'x</span>' +
+      '</div>' +
+      '<div class="btn-row">' +
+        '<button class="btn" data-action="again">Play Again</button>' +
+        '<button class="btn ghost" data-action="menu">Menu</button>' +
+      '</div>';
 
-    document.getElementById("startBtn").addEventListener("click", startGame);
     overlay.classList.remove("hidden");
-    beep(300, 0.3, "sine", 0.05);
-  }
-
-  function updateHud() {
-    hudTime.textContent = state.timeLeft.toFixed(1);
-    hudScore.textContent = state.score;
-
-    const acc = state.shots > 0 ? Math.round((state.hits / state.shots) * 100) : 100;
-    hudAcc.textContent = acc + "%";
-    hudStreak.textContent = state.streak;
-
-    hudTime.classList.toggle("warn", state.timeLeft <= 10);
-    hudAcc.classList.toggle("hot", acc >= 80 && state.shots >= 5);
-    hudStreak.classList.toggle("hot", state.streak >= 5);
+    beep(280, 0.25, "sine", 0.05);
   }
 
   /* =========================================================
-     Shooting
-     ========================================================= */
-  function shoot() {
-    if (!state.running) return;
-
-    state.shots++;
-
-    let index = -1;
-    for (let i = state.targets.length - 1; i >= 0; i--) {
-      const t = state.targets[i];
-      const dx = aim.x - t.x;
-      const dy = aim.y - t.y;
-      if (dx * dx + dy * dy <= t.r * t.r) {
-        index = i;
-        break;
-      }
-    }
-
-    if (index >= 0) {
-      const t = state.targets[index];
-      state.targets.splice(index, 1);
-
-      state.hits++;
-      state.streak++;
-      if (state.streak > state.bestStreak) state.bestStreak = state.streak;
-
-      const bonus = Math.min(state.streak, 20) * 10;
-      state.score += 100 + bonus;
-
-      burst(t.x, t.y, t.r);
-      beep(620 + Math.min(state.streak, 14) * 45, 0.08, "triangle", 0.045);
-      spawnTarget();
-    } else {
-      state.streak = 0;
-      state.score = Math.max(0, state.score - 15);
-      state.shake = 7;
-      missEffect(aim.x, aim.y);
-      beep(150, 0.09, "sawtooth", 0.028);
-    }
-
-    updateHud();
-  }
-
-  /* =========================================================
-     Update
-     ========================================================= */
-  function update(dt) {
-    // --- crosshair follows instantly (no smoothing = no input delay) ---
-    aim.x = raw.x;
-    aim.y = raw.y;
-
-    // --- timer ---
-    if (state.running) {
-      state.timeLeft -= dt;
-      if (state.timeLeft <= 0) {
-        state.timeLeft = 0;
-        updateHud();
-        endGame();
-      } else {
-        updateHud();
-      }
-    }
-
-    // --- targets ---
-    for (let i = state.targets.length - 1; i >= 0; i--) {
-      const t = state.targets[i];
-      t.age += dt;
-      t.wobble += dt * 1.6;
-
-      // gentle drift so the target feels alive
-      const drift = state.running ? 1 : 0.35;
-      t.x += t.driftX * dt * drift;
-      t.y += t.driftY * dt * drift;
-
-      const pad = t.r + 12;
-      if (t.x < pad || t.x > W - pad) {
-        t.driftX *= -1;
-        t.x = clamp(t.x, pad, Math.max(pad, W - pad));
-      }
-      if (t.y < pad || t.y > H - pad) {
-        t.driftY *= -1;
-        t.y = clamp(t.y, pad, Math.max(pad, H - pad));
-      }
-
-      if (state.running) {
-        t.life -= dt;
-        if (t.life <= 0) {
-          state.targets.splice(i, 1);
-          state.streak = 0;
-          updateHud();
-          spawnTarget();
-        }
-      }
-    }
-
-    // keep the arena populated
-    if (state.running && state.targets.length < MAX_TARGETS) {
-      spawnTarget();
-    }
-
-    // --- particles ---
-    for (let i = state.particles.length - 1; i >= 0; i--) {
-      const p = state.particles[i];
-      p.life -= dt;
-      if (p.life <= 0) {
-        state.particles.splice(i, 1);
-        continue;
-      }
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vx *= 0.92;
-      p.vy *= 0.92;
-    }
-
-    // --- ripples ---
-    for (let i = state.ripples.length - 1; i >= 0; i--) {
-      const r = state.ripples[i];
-      r.life -= dt;
-      if (r.life <= 0) {
-        state.ripples.splice(i, 1);
-        continue;
-      }
-      const p = 1 - r.life / r.maxLife;
-      r.radius = lerp(r.radius, r.maxRadius, p * 0.35 + 0.1);
-    }
-
-    // --- misc decay ---
-    state.shake *= Math.pow(0.001, dt);
-    if (state.shake < 0.15) state.shake = 0;
-    state.hitFlash = Math.max(0, state.hitFlash - dt * 4);
-  }
-
-  /* =========================================================
-     Render
-     ========================================================= */
-  function drawBackground() {
-    if (bgCanvas) {
-      ctx.drawImage(bgCanvas, 0, 0, W, H);
-    } else {
-      ctx.fillStyle = "#14120c";
-      ctx.fillRect(0, 0, W, H);
-    }
-  }
-
-  function drawRipples() {
-    for (const r of state.ripples) {
-      const a = Math.max(0, r.life / r.maxLife);
-      ctx.beginPath();
-      ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
-      ctx.lineWidth = r.bad ? 2 : 3;
-      ctx.strokeStyle = r.bad
-        ? "rgba(230, 60, 40, " + (a * 0.75).toFixed(3) + ")"
-        : "rgba(255, 180, 70, " + (a * 0.85).toFixed(3) + ")";
-      ctx.stroke();
-    }
-  }
-
-  function drawTargets() {
-    for (const t of state.targets) {
-      const grow = Math.min(1, t.age / 0.14);
-      const s = Math.max(0, easeOutBack(grow));
-      const r = t.r * s;
-      if (r <= 0.5) continue;
-
-      const lifeRatio = clamp(t.life / t.maxLife, 0, 1);
-      const pulse = 1 + Math.sin(t.wobble) * 0.03;
-
-      ctx.save();
-      ctx.translate(t.x, t.y);
-      ctx.scale(pulse, pulse);
-
-      // body — dark olive tactical
-      ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(38, 32, 20, 0.94)";
-      ctx.fill();
-
-      // outer ring — amber
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#ffb347";
-      ctx.stroke();
-
-      // middle ring
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.58, 0, Math.PI * 2);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "rgba(255, 200, 120, 0.8)";
-      ctx.stroke();
-
-      // bullseye — red-orange
-      ctx.beginPath();
-      ctx.arc(0, 0, Math.max(2, r * 0.17), 0, Math.PI * 2);
-      ctx.fillStyle = "#e63a1e";
-      ctx.fill();
-
-      ctx.restore();
-
-      // lifetime arc
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, t.r + 9, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * lifeRatio);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = lifeRatio < 0.3
-        ? "rgba(255, 80, 40, 0.9)"
-        : "rgba(255, 200, 120, 0.45)";
-      ctx.stroke();
-    }
-  }
-
-  function drawParticles() {
-    for (const p of state.particles) {
-      const a = clamp(p.life / p.maxLife, 0, 1);
-      ctx.globalAlpha = a;
-      ctx.fillStyle = p.hue;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * a, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function drawCrosshair() {
-    const x = aim.x;
-    const y = aim.y;
-    const flash = state.hitFlash;
-
-    ctx.save();
-    ctx.translate(x, y);
-
-    // outer glow ring
-    ctx.beginPath();
-    ctx.arc(0, 0, 16 + flash * 8, 0, Math.PI * 2);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = flash > 0
-      ? "rgba(255, 180, 70, " + (0.4 + flash * 0.6).toFixed(3) + ")"
-      : "rgba(255, 180, 70, 0.4)";
-    ctx.stroke();
-
-    // cross lines
-    const gap = 5 + flash * 3;
-    const len = 11;
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#ffb347";
-
-    ctx.beginPath();
-    ctx.moveTo(0, -gap); ctx.lineTo(0, -gap - len);
-    ctx.moveTo(0, gap);  ctx.lineTo(0, gap + len);
-    ctx.moveTo(-gap, 0); ctx.lineTo(-gap - len, 0);
-    ctx.moveTo(gap, 0);  ctx.lineTo(gap + len, 0);
-    ctx.stroke();
-
-    // center dot
-    ctx.beginPath();
-    ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-
-    ctx.restore();
-  }
-
-  function render() {
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-    drawBackground();
-
-    ctx.save();
-    if (state.shake > 0) {
-      ctx.translate(rand(-state.shake, state.shake), rand(-state.shake, state.shake));
-    }
-    drawRipples();
-    drawTargets();
-    drawParticles();
-    ctx.restore();
-
-    drawCrosshair();
-  }
-
-  /* =========================================================
-     Loop
-     ========================================================= */
-  let last = performance.now();
-
-  function loop(now) {
-    const dt = Math.min((now - last) / 1000, 0.05);
-    last = now;
-
-    update(dt);
-    render();
-
-    requestAnimationFrame(loop);
-  }
-
-  /* =========================================================
-     Input
+     Pointer lock
      ========================================================= */
   function requestPointerLock() {
     if (!canvas.requestPointerLock) return;
     const p = canvas.requestPointerLock();
-    if (p && p.catch) p.catch(() => {});
+    if (p && p.catch) p.catch(function () {});
   }
 
-  document.addEventListener("pointerlockchange", () => {
+  document.addEventListener("pointerlockchange", function () {
     pointerLocked = document.pointerLockElement === canvas;
     if (!pointerLocked && state.running) {
-      // user pressed ESC — pause and show overlay
       state.running = false;
-      overlay.classList.remove("hidden");
-      panel.innerHTML =
-        '<h1>Paused</h1>' +
-        '<p>Mouse unlock ho gaya.</p>' +
-        '<p class="hint"><b>Resume</b> dabao — cursor lock ho jayega.</p>' +
-        '<div class="slider-row">' +
-          '<label for="sensSlider">Sens</label>' +
-          '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
-          '<span id="sensValue">' + sensitivity.toFixed(2) + "x</span>" +
-        "</div>" +
-        '<button class="btn" id="startBtn">Resume</button>';
-      document.getElementById("startBtn").addEventListener("click", () => {
-        overlay.classList.add("hidden");
-        state.running = true;
-        requestPointerLock();
-      });
+      showPausePanel();
     }
   });
 
-  canvas.addEventListener("pointermove", (e) => {
+  /* =========================================================
+     Panels
+     ========================================================= */
+  function showMenu() {
+    panel.innerHTML =
+      '<h1>Select Mode</h1>' +
+      '<div class="mode-grid">' +
+        Object.keys(MODES).map(function (k) {
+          return '<button class="mode-card" data-mode="' + k + '">' +
+            '<span class="mode-name">' + MODES[k].name + '</span>' +
+            '<span class="mode-desc">' + MODES[k].desc + '</span>' +
+          '</button>';
+        }).join("") +
+      '</div>' +
+      '<div class="slider-row">' +
+        '<label for="sensSlider">Sens</label>' +
+        '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
+        '<span id="sensValue">' + sensitivity.toFixed(2) + 'x</span>' +
+      '</div>' +
+      '<p class="hint">Mouse lock ho jayega. <b>ESC</b> se pause / unlock.</p>';
+    overlay.classList.remove("hidden");
+  }
+
+  function showPausePanel() {
+    panel.innerHTML =
+      '<h1>Paused</h1>' +
+      '<p>Mouse unlocked. Press Resume to continue.</p>' +
+      '<div class="slider-row">' +
+        '<label for="sensSlider">Sens</label>' +
+        '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
+        '<span id="sensValue">' + sensitivity.toFixed(2) + 'x</span>' +
+      '</div>' +
+      '<div class="btn-row">' +
+        '<button class="btn" data-action="resume">Resume</button>' +
+        '<button class="btn ghost" data-action="menu">Menu</button>' +
+      '</div>';
+    overlay.classList.remove("hidden");
+  }
+
+  /* =========================================================
+     Panel events (delegated)
+     ========================================================= */
+  panel.addEventListener("click", function (e) {
+    const modeBtn = e.target.closest("[data-mode]");
+    if (modeBtn) {
+      startGame(modeBtn.getAttribute("data-mode"));
+      return;
+    }
+    const actionBtn = e.target.closest("[data-action]");
+    if (!actionBtn) return;
+    const action = actionBtn.getAttribute("data-action");
+    if (action === "again") startGame(state.mode);
+    else if (action === "menu") { state.running = false; showMenu(); }
+    else if (action === "resume") {
+      overlay.classList.add("hidden");
+      state.running = true;
+      requestPointerLock();
+    }
+  });
+
+  panel.addEventListener("input", function (e) {
+    if (e.target && e.target.id === "sensSlider") {
+      sensitivity = parseFloat(e.target.value);
+      const v = document.getElementById("sensValue");
+      if (v) v.textContent = sensitivity.toFixed(2) + "x";
+      try { localStorage.setItem("aim_sens", String(sensitivity)); } catch (err) {}
+    }
+  });
+
+  /* =========================================================
+     Input
+     ========================================================= */
+  canvas.addEventListener("pointermove", function (e) {
     if (pointerLocked) {
-      // relative movement scaled by sensitivity — zero smoothing
       raw.x = clamp(raw.x + e.movementX * sensitivity, 0, W);
       raw.y = clamp(raw.y + e.movementY * sensitivity, 0, H);
     } else {
@@ -888,73 +730,178 @@
     }
   });
 
-  canvas.addEventListener("pointerdown", (e) => {
+  canvas.addEventListener("pointerdown", function (e) {
     initAudio();
     if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
 
-    // If game running and pointer not locked, lock it first (mouse only)
     if (state.running && !pointerLocked && e.pointerType === "mouse") {
       requestPointerLock();
       e.preventDefault();
       return;
     }
 
-    // touch / pen: snap instantly so the tap lands where you pressed
     if (e.pointerType !== "mouse") {
-      aim.x = e.clientX;
-      aim.y = e.clientY;
-      raw.x = e.clientX;
-      raw.y = e.clientY;
+      raw.x = e.clientX; raw.y = e.clientY;
+      aim.x = raw.x; aim.y = raw.y;
     }
+
+    if (!state.running) return;
+    if (state.mode === "tracking") return;
 
     shoot();
     e.preventDefault();
   });
 
-  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 
   window.addEventListener("resize", resize);
-  window.addEventListener("orientationchange", () => setTimeout(resize, 120));
+  window.addEventListener("orientationchange", function () {
+    setTimeout(resize, 120);
+  });
 
-  window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" || e.code === "Enter") {
-      if (!state.running && !overlay.classList.contains("hidden")) {
-        startGame();
-        e.preventDefault();
+  /* =========================================================
+     Shooting
+     ========================================================= */
+  function shoot() {
+    const mode = MODES[state.mode];
+    if (!mode) return;
+
+    state.shots++;
+
+    let hit = null;
+    for (let i = 0; i < state.targets.length; i++) {
+      const t = state.targets[i];
+      if (t.visible === false) continue;
+      const dx = aim.x - t.x;
+      const dy = aim.y - t.y;
+      if (dx * dx + dy * dy <= t.r * t.r) { hit = t; break; }
+    }
+
+    if (hit) {
+      state.hits++;
+      state.hitFlash = 1;
+      mode.onHit(hit);
+      beep(620, 0.06, "square", 0.04);
+    } else {
+      mode.onMiss();
+      beep(150, 0.07, "square", 0.03);
+    }
+    updateHud();
+  }
+
+  /* =========================================================
+     Update
+     ========================================================= */
+  function update(dt) {
+    aim.x = raw.x;
+    aim.y = raw.y;
+
+    if (state.running) {
+      state.timeLeft -= dt;
+      if (state.timeLeft <= 0) {
+        state.timeLeft = 0;
+        updateHud();
+        endGame();
+        return;
       }
+      const mode = MODES[state.mode];
+      if (mode && mode.tick) mode.tick(dt);
+      updateHud();
     }
-  });
 
-  startBtn.addEventListener("click", startGame);
-
-  // Load saved sensitivity
-  try {
-    const saved = parseFloat(localStorage.getItem("aim_sens"));
-    if (saved && saved >= 0.2 && saved <= 3) sensitivity = saved;
-  } catch (e) {}
-
-  if (sensSlider) sensSlider.value = String(sensitivity);
-  if (sensValue) sensValue.textContent = sensitivity.toFixed(2) + "x";
-
-  // Delegated input handler (works after panel.innerHTML rebuilds)
-  panel.addEventListener("input", (e) => {
-    if (e.target && e.target.id === "sensSlider") {
-      sensitivity = parseFloat(e.target.value);
-      const valEl = document.getElementById("sensValue");
-      if (valEl) valEl.textContent = sensitivity.toFixed(2) + "x";
-      try { localStorage.setItem("aim_sens", String(sensitivity)); } catch (e2) {}
+    if (state.hitFlash > 0) {
+      state.hitFlash = Math.max(0, state.hitFlash - dt * 5);
     }
-  });
+  }
+
+  /* =========================================================
+     Render
+     ========================================================= */
+  function render() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    if (bgCanvas) ctx.drawImage(bgCanvas, 0, 0, W, H);
+
+    const mode = MODES[state.mode];
+    if (mode && mode.draw && state.running) mode.draw(ctx);
+
+    // targets
+    ctx.lineWidth = 2;
+    for (let i = 0; i < state.targets.length; i++) {
+      const t = state.targets[i];
+      if (t.visible === false) continue;
+
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(48, 40, 24, 0.9)";
+      ctx.fill();
+      ctx.strokeStyle = "#ffb347";
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, t.r * 0.55, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255, 200, 120, 0.7)";
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, Math.max(2, t.r * 0.16), 0, Math.PI * 2);
+      ctx.fillStyle = "#e63a1e";
+      ctx.fill();
+    }
+
+    // crosshair
+    const flash = state.hitFlash;
+    const cx = aim.x, cy = aim.y;
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 15 + flash * 5, 0, Math.PI * 2);
+    ctx.strokeStyle = flash > 0
+      ? "rgba(255, 200, 100, " + (0.4 + flash * 0.5).toFixed(3) + ")"
+      : "rgba(255, 180, 70, 0.4)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const gap = 5, len = 10;
+    ctx.strokeStyle = "#ffb347";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - gap);       ctx.lineTo(cx, cy - gap - len);
+    ctx.moveTo(cx, cy + gap);       ctx.lineTo(cx, cy + gap + len);
+    ctx.moveTo(cx - gap, cy);       ctx.lineTo(cx - gap - len, cy);
+    ctx.moveTo(cx + gap, cy);       ctx.lineTo(cx + gap + len, cy);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+  }
+
+  /* =========================================================
+     Loop
+     ========================================================= */
+  let last = performance.now();
+  function loop(t) {
+    const dt = Math.min((t - last) / 1000, 0.05);
+    last = t;
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
 
   /* =========================================================
      Boot
      ========================================================= */
-  raw.x = window.innerWidth / 2;
-  raw.y = window.innerHeight / 2;
-  aim.x = raw.x;
-  aim.y = raw.y;
+  try {
+    const s = parseFloat(localStorage.getItem("aim_sens"));
+    if (s && s >= 0.2 && s <= 3) sensitivity = s;
+  } catch (e) {}
 
   resize();
+  raw.x = W / 2; raw.y = H / 2;
+  aim.x = raw.x; aim.y = raw.y;
+
+  showMenu();
   requestAnimationFrame(loop);
 })();
 </script>

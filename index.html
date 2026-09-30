@@ -9,111 +9,106 @@
   html, body { height: 100%; overflow: hidden; background: #14120c; }
   body {
     font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    color: #e8dcc0;
-    user-select: none;
-    -webkit-user-select: none;
+    color: #e8dcc0; user-select: none; -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
 
-  #game {
-    position: fixed;
-    inset: 0;
-    width: 100%; height: 100%;
-    display: block;
-    cursor: none;
-    touch-action: none;
-  }
+  #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: none; touch-action: none; }
 
   .hud {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    display: flex; gap: 10px;
-    justify-content: center; flex-wrap: wrap;
-    padding: 14px;
-    pointer-events: none;
-    z-index: 5;
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    padding: 12px; pointer-events: none; z-index: 5;
   }
   .chip {
     display: flex; flex-direction: column; align-items: center;
-    min-width: 90px;
-    padding: 8px 14px;
-    border-radius: 4px;
+    min-width: 82px; padding: 6px 12px; border-radius: 4px;
     background: rgba(28, 24, 16, 0.88);
     border: 1px solid rgba(230, 170, 60, 0.4);
   }
   .chip .label {
-    font-size: 10px; letter-spacing: 0.24em;
-    text-transform: uppercase; color: #a08d5e; font-weight: 600;
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: #a08d5e; font-weight: 600;
   }
   .chip .value {
-    font-size: 22px; font-weight: 700;
+    font-size: 20px; font-weight: 700;
     font-family: ui-monospace, "Courier New", monospace;
-    color: #ffb347; line-height: 1.25;
+    color: #ffb347; line-height: 1.2;
   }
   .chip .value.hot { color: #ffe27a; }
   .chip .value.warn { color: #ff5c33; }
+  .chip.ammo { min-width: 110px; border-color: rgba(230, 170, 60, 0.6); }
+  .chip.ammo .value { font-size: 22px; letter-spacing: 0.05em; }
+  .chip.ammo.reloading .value { color: #ff5c33; }
+  .chip.ammo.empty .value { color: #ff2020; }
 
   .overlay {
-    position: fixed; inset: 0;
-    display: grid; place-items: center;
-    background: rgba(10, 9, 6, 0.94);
-    z-index: 10;
-    cursor: default;
+    position: fixed; inset: 0; display: grid; place-items: center;
+    background: rgba(10, 9, 6, 0.94); z-index: 10; cursor: default;
+    padding: 20px; overflow-y: auto;
   }
   .overlay.hidden { display: none; }
 
   .panel {
-    width: min(560px, 92vw);
-    padding: 26px 24px;
+    width: min(620px, 92vw); padding: 26px 24px;
     background: rgba(22, 19, 13, 0.98);
     border: 1px solid rgba(230, 170, 60, 0.35);
-    border-radius: 6px;
-    text-align: center;
+    border-radius: 6px; text-align: center;
   }
   .panel h1 {
-    font-size: 24px; letter-spacing: 0.28em;
-    text-transform: uppercase; margin-bottom: 18px;
-    color: #ffb347; font-weight: 800;
+    font-size: 22px; letter-spacing: 0.28em; text-transform: uppercase;
+    margin-bottom: 16px; color: #ffb347; font-weight: 800;
   }
-  .panel p {
-    font-size: 14px; line-height: 1.7;
-    color: #c9b98a; margin-bottom: 10px;
-  }
-  .panel .hint {
-    font-size: 12px; color: #8a7d5c;
-    margin-bottom: 18px; letter-spacing: 0.05em;
-  }
+  .panel p { font-size: 14px; line-height: 1.7; color: #c9b98a; margin-bottom: 10px; }
+  .panel .hint { font-size: 12px; color: #8a7d5c; margin-bottom: 14px; letter-spacing: 0.05em; }
   .panel .hint b { color: #ffb347; }
 
-  .mode-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-bottom: 20px;
+  .section-title {
+    font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: #a08d5e; font-weight: 700; margin: 12px 0 8px; text-align: left;
   }
+
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
   .mode-card {
-    appearance: none; cursor: pointer; font: inherit;
-    text-align: left; padding: 14px 16px;
-    background: rgba(255, 180, 70, 0.04);
-    border: 1px solid rgba(230, 170, 60, 0.25);
-    border-radius: 4px; color: #e8dcc0;
+    appearance: none; cursor: pointer; font: inherit; text-align: left;
+    padding: 12px 14px; background: rgba(255, 180, 70, 0.04);
+    border: 1px solid rgba(230, 170, 60, 0.25); border-radius: 4px;
+    color: #e8dcc0;
   }
-  .mode-card:hover {
-    background: rgba(255, 180, 70, 0.12);
-    border-color: rgba(230, 170, 60, 0.6);
-  }
+  .mode-card:hover { background: rgba(255, 180, 70, 0.12); border-color: rgba(230, 170, 60, 0.6); }
   .mode-card:active { transform: scale(0.99); }
   .mode-card .mode-name {
-    display: block; font-size: 14px; font-weight: 800;
+    display: block; font-size: 13px; font-weight: 800;
     letter-spacing: 0.14em; text-transform: uppercase;
-    color: #ffb347; margin-bottom: 4px;
+    color: #ffb347; margin-bottom: 3px;
   }
-  .mode-card .mode-desc {
-    display: block; font-size: 12px;
-    color: #a08d5e; line-height: 1.4;
+  .mode-card .mode-desc { display: block; font-size: 11px; color: #a08d5e; line-height: 1.4; }
+
+  .gun-row {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 6px; margin-bottom: 6px;
+  }
+  @media (max-width: 560px) { .gun-row { grid-template-columns: repeat(3, 1fr); } }
+  .gun-card {
+    appearance: none; cursor: pointer; font: inherit;
+    padding: 8px 4px; background: rgba(255, 180, 70, 0.04);
+    border: 1px solid rgba(230, 170, 60, 0.25); border-radius: 4px;
+    color: #e8dcc0; text-align: center;
+  }
+  .gun-card:hover { background: rgba(255, 180, 70, 0.12); }
+  .gun-card.active { background: rgba(255, 180, 70, 0.2); border-color: #ffb347; box-shadow: inset 0 0 12px rgba(255, 150, 30, 0.2); }
+  .gun-card .gun-name {
+    display: block; font-size: 11px; font-weight: 800;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #ffb347; margin-bottom: 2px;
+  }
+  .gun-card .gun-tag {
+    display: block; font-size: 9px; color: #8a7d5c; letter-spacing: 0.14em;
   }
 
   .stats-grid {
     display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 8px; margin: 16px 0 22px;
+    gap: 8px; margin: 14px 0 18px;
   }
   .stats-grid .cell {
     background: rgba(255, 180, 70, 0.05);
@@ -121,27 +116,24 @@
     border-radius: 4px; padding: 10px 8px;
   }
   .stats-grid .cell span {
-    display: block; font-size: 10px; letter-spacing: 0.24em;
+    display: block; font-size: 10px; letter-spacing: 0.22em;
     text-transform: uppercase; color: #a08d5e;
     margin-bottom: 4px; font-weight: 600;
   }
   .stats-grid .cell strong {
-    font-size: 22px;
-    font-family: ui-monospace, "Courier New", monospace;
+    font-size: 20px; font-family: ui-monospace, "Courier New", monospace;
     color: #ffb347;
   }
 
   .slider-row {
     display: flex; align-items: center; gap: 12px;
-    padding: 12px 14px; margin-bottom: 16px;
+    padding: 10px 14px; margin-bottom: 12px;
     background: rgba(255, 180, 70, 0.05);
-    border: 1px solid rgba(230, 170, 60, 0.2);
-    border-radius: 4px;
+    border: 1px solid rgba(230, 170, 60, 0.2); border-radius: 4px;
   }
   .slider-row label {
-    font-size: 11px; letter-spacing: 0.2em;
-    text-transform: uppercase; color: #a08d5e;
-    font-weight: 700; flex: 0 0 auto;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #a08d5e; font-weight: 700; flex: 0 0 auto;
   }
   .slider-row input[type="range"] {
     flex: 1; appearance: none; -webkit-appearance: none;
@@ -163,22 +155,18 @@
     font-size: 13px; color: #ffb347; font-weight: 700;
   }
 
-  .btn-row { display: flex; gap: 10px; justify-content: center; }
-
+  .btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
   .btn {
     appearance: none; cursor: pointer; font: inherit;
     font-weight: 800; font-size: 14px;
     letter-spacing: 0.22em; text-transform: uppercase;
-    padding: 12px 30px; border-radius: 4px;
+    padding: 12px 28px; border-radius: 4px;
     color: #1a1000; background: #ffb347;
     border: 1px solid rgba(255, 200, 100, 0.5);
   }
   .btn:hover { background: #ffc46b; }
   .btn:active { transform: scale(0.98); }
-  .btn.ghost {
-    background: transparent; color: #ffb347;
-    border-color: rgba(230, 170, 60, 0.35);
-  }
+  .btn.ghost { background: transparent; color: #ffb347; border-color: rgba(230, 170, 60, 0.35); }
   .btn.ghost:hover { background: rgba(255, 180, 70, 0.1); }
 </style>
 </head>
@@ -187,9 +175,10 @@
 <canvas id="game"></canvas>
 
 <div class="hud">
-  <div class="chip"><span class="label">Mode</span><span class="value" id="hudMode" style="font-size:14px">—</span></div>
+  <div class="chip"><span class="label">Mode</span><span class="value" id="hudMode" style="font-size:13px">—</span></div>
   <div class="chip"><span class="label">Time</span><span class="value" id="hudTime">60.0</span></div>
   <div class="chip"><span class="label">Score</span><span class="value" id="hudScore">0</span></div>
+  <div class="chip ammo" id="hudAmmoChip"><span class="label" id="hudGunName">Gun</span><span class="value" id="hudAmmo">—</span></div>
   <div class="chip"><span class="label" id="hudAccLabel">Accuracy</span><span class="value" id="hudAcc">100%</span></div>
   <div class="chip"><span class="label">Streak</span><span class="value" id="hudStreak">0</span></div>
 </div>
@@ -216,6 +205,9 @@
   const hudAcc = document.getElementById("hudAcc");
   const hudAccLabel = document.getElementById("hudAccLabel");
   const hudStreak = document.getElementById("hudStreak");
+  const hudAmmoChip = document.getElementById("hudAmmoChip");
+  const hudAmmo = document.getElementById("hudAmmo");
+  const hudGunName = document.getElementById("hudGunName");
 
   /* =========================================================
      Utils
@@ -223,7 +215,6 @@
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
   const nowMs = () => performance.now();
-
   function shuffle(a) {
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -233,7 +224,7 @@
   }
 
   /* =========================================================
-     Canvas
+     Canvas + pre-rendered bg
      ========================================================= */
   let W = 0, H = 0, DPR = 1;
   let bgCanvas = null, bgCtx = null;
@@ -247,10 +238,171 @@
   let pointerLocked = false;
 
   /* =========================================================
+     Audio engine
+     ========================================================= */
+  let audioCtx = null;
+  let masterGain = null;
+  let noiseBuffer = null;
+
+  function initAudio() {
+    if (audioCtx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioCtx = new AC();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.9;
+    masterGain.connect(audioCtx.destination);
+  }
+
+  function getNoiseBuffer() {
+    if (noiseBuffer || !audioCtx) return noiseBuffer;
+    const len = Math.floor(audioCtx.sampleRate * 1.0);
+    noiseBuffer = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const d = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    return noiseBuffer;
+  }
+
+  /* Layered gunshot synthesis — noise body + sub-bass + crack + tail */
+  function playGunshot(gun) {
+    if (!audioCtx || !masterGain) return;
+    const s = gun.sound;
+    const noise = getNoiseBuffer();
+    if (!noise) return;
+    const t = audioCtx.currentTime;
+
+    // Body — filtered noise
+    const src1 = audioCtx.createBufferSource();
+    src1.buffer = noise;
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = s.bpFreq;
+    bp.Q.value = s.bpQ;
+    const g1 = audioCtx.createGain();
+    g1.gain.setValueAtTime(s.volume, t);
+    g1.gain.exponentialRampToValueAtTime(0.0001, t + s.bodyDur);
+    src1.connect(bp); bp.connect(g1); g1.connect(masterGain);
+    src1.start(t); src1.stop(t + s.bodyDur + 0.05);
+
+    // Sub-bass thump
+    const osc = audioCtx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(s.subFreq, t);
+    osc.frequency.exponentialRampToValueAtTime(s.subFreq * 0.35, t + s.bodyDur);
+    const g2 = audioCtx.createGain();
+    g2.gain.setValueAtTime(s.subVol, t);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + s.bodyDur);
+    osc.connect(g2); g2.connect(masterGain);
+    osc.start(t); osc.stop(t + s.bodyDur + 0.05);
+
+    // High crack transient
+    const src2 = audioCtx.createBufferSource();
+    src2.buffer = noise;
+    const hp = audioCtx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 4500;
+    const g3 = audioCtx.createGain();
+    g3.gain.setValueAtTime(s.crackVol, t);
+    g3.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    src2.connect(hp); hp.connect(g3); g3.connect(masterGain);
+    src2.start(t); src2.stop(t + 0.06);
+
+    // Air tail — lowpassed noise, slow decay
+    const src3 = audioCtx.createBufferSource();
+    src3.buffer = noise;
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 1200;
+    const g4 = audioCtx.createGain();
+    g4.gain.setValueAtTime(0.0001, t);
+    g4.gain.linearRampToValueAtTime(s.volume * 0.28, t + 0.012);
+    g4.gain.exponentialRampToValueAtTime(0.0001, t + s.bodyDur * 2);
+    src3.connect(lp); lp.connect(g4); g4.connect(masterGain);
+    src3.start(t); src3.stop(t + s.bodyDur * 2 + 0.05);
+  }
+
+  function playReloadClick(pitch) {
+    if (!audioCtx || !masterGain) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    osc.type = "square";
+    osc.frequency.value = pitch;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.06, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t); osc.stop(t + 0.06);
+  }
+
+  function playEmptyClick() {
+    if (!audioCtx || !masterGain) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    osc.type = "square";
+    osc.frequency.value = 1400;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.04, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t); osc.stop(t + 0.04);
+  }
+
+  function playHitConfirm() {
+    if (!audioCtx || !masterGain) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(900, t);
+    osc.frequency.exponentialRampToValueAtTime(1300, t + 0.05);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.05, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t); osc.stop(t + 0.07);
+  }
+
+  /* =========================================================
+     GUNS
+     ========================================================= */
+  const GUNS = {
+    m9: {
+      name: "M9", tag: "PISTOL",
+      damage: 100, fireDelay: 140, magSize: 15, reloadTime: 900,
+      color: "#9a9a9a", kick: 3,
+      sound: { bodyDur: 0.16, subFreq: 190, subVol: 0.14, bpFreq: 700, bpQ: 0.9, volume: 0.4, crackVol: 0.18 }
+    },
+    mp5: {
+      name: "MP5", tag: "SMG",
+      damage: 70, fireDelay: 80, magSize: 30, reloadTime: 1300,
+      color: "#6a6a6a", kick: 2,
+      sound: { bodyDur: 0.10, subFreq: 230, subVol: 0.10, bpFreq: 950, bpQ: 1.0, volume: 0.32, crackVol: 0.20 }
+    },
+    ak47: {
+      name: "AK-47", tag: "RIFLE",
+      damage: 150, fireDelay: 115, magSize: 30, reloadTime: 1700,
+      color: "#7a4a22", kick: 5,
+      sound: { bodyDur: 0.24, subFreq: 140, subVol: 0.18, bpFreq: 520, bpQ: 0.8, volume: 0.45, crackVol: 0.22 }
+    },
+    spas: {
+      name: "SPAS-12", tag: "SHOTGUN",
+      damage: 250, fireDelay: 700, magSize: 7, reloadTime: 2000,
+      color: "#4a3a1a", kick: 10,
+      sound: { bodyDur: 0.42, subFreq: 90, subVol: 0.24, bpFreq: 340, bpQ: 0.7, volume: 0.55, crackVol: 0.14 }
+    },
+    awp: {
+      name: "AWP", tag: "SNIPER",
+      damage: 400, fireDelay: 1150, magSize: 5, reloadTime: 2300,
+      color: "#3a4a34", kick: 12,
+      sound: { bodyDur: 0.55, subFreq: 115, subVol: 0.28, bpFreq: 380, bpQ: 0.6, volume: 0.6, crackVol: 0.26 }
+    }
+  };
+
+  /* =========================================================
      State
      ========================================================= */
   const state = {
     mode: null,
+    gunKey: "m9",
     running: false,
     timeLeft: 60,
     score: 0,
@@ -260,33 +412,17 @@
     bestStreak: 0,
     targets: [],
     hitFlash: 0,
-    modeData: {}
+    modeData: {},
+    ammo: 0,
+    isReloading: false,
+    reloadEndAt: 0,
+    lastShotAt: 0,
+    mouseDown: false,
+    muzzleFlash: 0
   };
 
   /* =========================================================
-     Audio
-     ========================================================= */
-  let audioCtx = null;
-  function initAudio() {
-    if (audioCtx) return;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (AC) audioCtx = new AC();
-  }
-  function beep(freq, dur, type, vol) {
-    if (!audioCtx) return;
-    const t = audioCtx.currentTime;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type || "square";
-    o.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(vol || 0.04, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(t); o.stop(t + dur + 0.02);
-  }
-
-  /* =========================================================
-     Resize + pre-rendered background
+     Resize
      ========================================================= */
   function resize() {
     DPR = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -298,7 +434,6 @@
     canvas.style.height = H + "px";
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    // pre-render static background (grid + vignette) once
     bgCanvas = document.createElement("canvas");
     bgCanvas.width = canvas.width;
     bgCanvas.height = canvas.height;
@@ -327,12 +462,11 @@
 
     raw.x = clamp(raw.x || W / 2, 0, W);
     raw.y = clamp(raw.y || H / 2, 0, H);
-    aim.x = raw.x;
-    aim.y = raw.y;
+    aim.x = raw.x; aim.y = raw.y;
   }
 
   /* =========================================================
-     Grid helper (gridshot)
+     Grid helper
      ========================================================= */
   function getGridCells(count) {
     const cols = Math.ceil(Math.sqrt(count));
@@ -342,7 +476,6 @@
     const cellH = (H - margin * 2) / rows;
     const size = Math.min(cellW, cellH);
     const r = clamp(size * 0.32, 22, 46);
-
     const cells = [];
     for (let i = 0; i < count; i++) {
       const c = i % cols;
@@ -366,22 +499,16 @@
      ========================================================= */
   const MODES = {
     gridshot: {
-      name: "Gridshot",
-      desc: "4 targets in grid",
-      time: 60,
+      name: "Gridshot", desc: "4 targets in a grid", time: 60, usesAmmo: true,
       init() {
         state.targets.length = 0;
         const cells = getGridCells(9);
         state.modeData = { cells: cells };
         const idx = shuffle([0,1,2,3,4,5,6,7,8]).slice(0, 4);
-        for (const i of idx) {
-          state.targets.push({
-            x: cells[i].x, y: cells[i].y, r: cells[i].r, ci: i
-          });
-        }
+        for (const i of idx) state.targets.push({ x: cells[i].x, y: cells[i].y, r: cells[i].r, ci: i });
       },
-      onHit(t) {
-        state.score += 100;
+      onHit(t, gun) {
+        state.score += gun.damage;
         state.targets.splice(state.targets.indexOf(t), 1);
         const cells = state.modeData.cells;
         const used = {};
@@ -390,39 +517,33 @@
         for (let i = 0; i < cells.length; i++) if (!used[i]) empty.push(i);
         if (empty.length) {
           const c = empty[(Math.random() * empty.length) | 0];
-          state.targets.push({
-            x: cells[c].x, y: cells[c].y, r: cells[c].r, ci: c
-          });
+          state.targets.push({ x: cells[c].x, y: cells[c].y, r: cells[c].r, ci: c });
         }
       },
       onMiss() { state.score = Math.max(0, state.score - 20); },
       tick() {},
-      draw(ctx) {
+      draw(c) {
         const cells = state.modeData.cells;
-        ctx.strokeStyle = "rgba(230, 170, 60, 0.1)";
-        ctx.lineWidth = 1;
-        for (const c of cells) {
-          ctx.beginPath();
-          ctx.arc(c.x, c.y, c.r + 8, 0, Math.PI * 2);
-          ctx.stroke();
+        c.strokeStyle = "rgba(230, 170, 60, 0.1)";
+        c.lineWidth = 1;
+        for (const cc of cells) {
+          c.beginPath(); c.arc(cc.x, cc.y, cc.r + 8, 0, Math.PI * 2); c.stroke();
         }
       }
     },
 
     flick: {
-      name: "Flick",
-      desc: "One target, anywhere",
-      time: 60,
+      name: "Flick", desc: "One target anywhere", time: 60, usesAmmo: true,
       init() {
         state.targets.length = 0;
         const r = clamp(Math.min(W, H) * 0.048, 22, 40);
         state.targets.push(spawnRandomTarget(r));
       },
-      onHit(t) {
+      onHit(t, gun) {
         state.streak++;
         if (state.streak > state.bestStreak) state.bestStreak = state.streak;
         const bonus = Math.min(state.streak, 15) * 5;
-        state.score += 100 + bonus;
+        state.score += gun.damage + bonus;
         state.targets.splice(state.targets.indexOf(t), 1);
         const r = clamp(Math.min(W, H) * 0.048, 22, 40);
         state.targets.push(spawnRandomTarget(r));
@@ -431,89 +552,63 @@
         state.streak = 0;
         state.score = Math.max(0, state.score - 20);
       },
-      tick() {},
-      draw() {}
+      tick() {}, draw() {}
     },
 
     tracking: {
-      name: "Tracking",
-      desc: "Hold crosshair on target",
-      time: 30,
+      name: "Tracking", desc: "Hold crosshair on target", time: 30, usesAmmo: false,
       init() {
         state.targets.length = 0;
         const r = clamp(Math.min(W, H) * 0.055, 26, 46);
-        state.targets.push({
-          x: W / 2, y: H / 2, r: r,
-          vx: 220, vy: 170
-        });
+        state.targets.push({ x: W / 2, y: H / 2, r: r, vx: 220, vy: 170 });
         state.modeData = { onTime: 0, totalTime: 0 };
       },
-      onHit() {},
-      onMiss() {},
+      onHit() {}, onMiss() {},
       tick(dt) {
         const t = state.targets[0];
         if (!t) return;
-        t.x += t.vx * dt;
-        t.y += t.vy * dt;
+        t.x += t.vx * dt; t.y += t.vy * dt;
         const pad = t.r + 12;
         if (t.x < pad) { t.x = pad; t.vx = Math.abs(t.vx); }
         if (t.x > W - pad) { t.x = W - pad; t.vx = -Math.abs(t.vx); }
         if (t.y < pad) { t.y = pad; t.vy = Math.abs(t.vy); }
         if (t.y > H - pad) { t.y = H - pad; t.vy = -Math.abs(t.vy); }
-
-        const dx = aim.x - t.x;
-        const dy = aim.y - t.y;
+        const dx = aim.x - t.x, dy = aim.y - t.y;
         const on = (dx * dx + dy * dy) <= t.r * t.r;
-
         state.modeData.totalTime += dt;
-        if (on) {
-          state.modeData.onTime += dt;
-          state.score += dt * 200;
-        }
+        if (on) { state.modeData.onTime += dt; state.score += dt * 200; }
       },
       draw() {}
     },
 
     reaction: {
-      name: "Reaction",
-      desc: "Click the instant it appears",
-      time: 60,
+      name: "Reaction", desc: "Click the instant it appears", time: 60, usesAmmo: true,
       init() {
         state.targets.length = 0;
         const r = clamp(Math.min(W, H) * 0.05, 24, 42);
         state.targets.push({
           x: W / 2, y: H / 2, r: r,
-          wait: rand(0.6, 1.6),
-          visible: false,
-          spawnTime: 0
+          wait: rand(0.6, 1.6), visible: false, spawnTime: 0
         });
         state.modeData = { lastRT: 0, bestRT: Infinity, rtSum: 0, rtCount: 0 };
       },
-      onHit(t) {
+      onHit(t, gun) {
         const rt = nowMs() - t.spawnTime;
         state.modeData.lastRT = rt;
         if (rt < state.modeData.bestRT) state.modeData.bestRT = rt;
         state.modeData.rtSum += rt;
         state.modeData.rtCount++;
-        state.score += Math.max(20, Math.round(500 - rt * 0.4));
-
-        t.wait = rand(0.6, 1.6);
-        t.visible = false;
+        state.score += Math.max(20, Math.round(gun.damage * 3 - rt * 0.5));
+        t.wait = rand(0.6, 1.6); t.visible = false;
         const pad = t.r + 80;
-        t.x = rand(pad, W - pad);
-        t.y = rand(pad, H - pad);
+        t.x = rand(pad, W - pad); t.y = rand(pad, H - pad);
       },
       onMiss() { state.score = Math.max(0, state.score - 30); },
       tick(dt) {
         const t = state.targets[0];
-        if (!t) return;
-        if (!t.visible) {
-          t.wait -= dt;
-          if (t.wait <= 0) {
-            t.visible = true;
-            t.spawnTime = nowMs();
-          }
-        }
+        if (!t || t.visible) return;
+        t.wait -= dt;
+        if (t.wait <= 0) { t.visible = true; t.spawnTime = nowMs(); }
       },
       draw() {}
     }
@@ -527,6 +622,24 @@
     hudScore.textContent = Math.round(state.score);
     hudStreak.textContent = state.streak;
     hudTime.classList.toggle("warn", state.timeLeft <= 10);
+
+    const gun = GUNS[state.gunKey];
+    hudGunName.textContent = gun.name;
+    const mode = state.mode ? MODES[state.mode] : null;
+    const ammoApplies = mode && mode.usesAmmo;
+
+    if (!ammoApplies) {
+      hudAmmo.textContent = "∞";
+      hudAmmoChip.classList.remove("reloading", "empty");
+    } else if (state.isReloading) {
+      hudAmmo.textContent = "RELOAD";
+      hudAmmoChip.classList.add("reloading");
+      hudAmmoChip.classList.remove("empty");
+    } else {
+      hudAmmo.textContent = state.ammo + " / " + gun.magSize;
+      hudAmmoChip.classList.toggle("empty", state.ammo === 0);
+      hudAmmoChip.classList.remove("reloading");
+    }
 
     if (!state.mode) return;
 
@@ -554,16 +667,19 @@
      ========================================================= */
   function resetGame(modeKey) {
     const mode = MODES[modeKey];
+    const gun = GUNS[state.gunKey];
     state.mode = modeKey;
     state.timeLeft = mode.time;
-    state.score = 0;
-    state.hits = 0;
-    state.shots = 0;
-    state.streak = 0;
-    state.bestStreak = 0;
+    state.score = 0; state.hits = 0; state.shots = 0;
+    state.streak = 0; state.bestStreak = 0;
     state.targets.length = 0;
-    state.hitFlash = 0;
+    state.hitFlash = 0; state.muzzleFlash = 0;
     state.modeData = {};
+    state.ammo = gun.magSize;
+    state.isReloading = false;
+    state.reloadEndAt = 0;
+    state.lastShotAt = 0;
+    state.mouseDown = false;
     mode.init();
     hudMode.textContent = mode.name;
     updateHud();
@@ -571,28 +687,27 @@
 
   function startGame(modeKey) {
     initAudio();
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
     resetGame(modeKey);
     raw.x = W / 2; raw.y = H / 2;
     aim.x = raw.x; aim.y = raw.y;
     state.running = true;
     overlay.classList.add("hidden");
     requestPointerLock();
-    beep(600, 0.1, "square", 0.04);
   }
 
   function endGame() {
     state.running = false;
+    state.mouseDown = false;
     const mode = MODES[state.mode];
+    const gun = GUNS[state.gunKey];
     const acc = state.shots > 0 ? Math.round((state.hits / state.shots) * 100) : 100;
 
-    let accLabel = "Accuracy";
-    let accValue = acc + "%";
+    let accLabel = "Accuracy", accValue = acc + "%";
     if (state.mode === "tracking") {
       const d = state.modeData;
       accLabel = "On Target";
-      accValue = d.totalTime > 0
-        ? Math.round((d.onTime / d.totalTime) * 100) + "%"
-        : "0%";
+      accValue = d.totalTime > 0 ? Math.round((d.onTime / d.totalTime) * 100) + "%" : "0%";
     } else if (state.mode === "reaction") {
       const d = state.modeData;
       accLabel = "Best RT";
@@ -616,19 +731,16 @@
         '<div class="cell"><span>Score</span><strong>' + Math.round(state.score) + '</strong></div>' +
         '<div class="cell"><span>' + accLabel + '</span><strong>' + accValue + '</strong></div>' +
         extras.join("") +
+        '<div class="cell"><span>Gun</span><strong>' + gun.name + '</strong></div>' +
+        '<div class="cell"><span>Best Streak</span><strong>' + state.bestStreak + '</strong></div>' +
       '</div>' +
-      '<div class="slider-row">' +
-        '<label for="sensSlider">Sens</label>' +
-        '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
-        '<span id="sensValue">' + sensitivity.toFixed(2) + 'x</span>' +
-      '</div>' +
+      renderSensSlider() +
       '<div class="btn-row">' +
         '<button class="btn" data-action="again">Play Again</button>' +
         '<button class="btn ghost" data-action="menu">Menu</button>' +
       '</div>';
 
     overlay.classList.remove("hidden");
-    beep(280, 0.25, "sine", 0.05);
   }
 
   /* =========================================================
@@ -644,6 +756,7 @@
     pointerLocked = document.pointerLockElement === canvas;
     if (!pointerLocked && state.running) {
       state.running = false;
+      state.mouseDown = false;
       showPausePanel();
     }
   });
@@ -651,9 +764,34 @@
   /* =========================================================
      Panels
      ========================================================= */
+  function renderSensSlider() {
+    return '<div class="slider-row">' +
+      '<label for="sensSlider">Sens</label>' +
+      '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
+      '<span id="sensValue">' + sensitivity.toFixed(2) + 'x</span>' +
+    '</div>';
+  }
+
+  function renderGunRow() {
+    const keys = Object.keys(GUNS);
+    return '<div class="section-title">Weapon</div>' +
+      '<div class="gun-row">' +
+        keys.map(function (k) {
+          const g = GUNS[k];
+          const active = k === state.gunKey ? " active" : "";
+          return '<button class="gun-card' + active + '" data-gun="' + k + '">' +
+            '<span class="gun-name">' + g.name + '</span>' +
+            '<span class="gun-tag">' + g.tag + '</span>' +
+          '</button>';
+        }).join("") +
+      '</div>';
+  }
+
   function showMenu() {
     panel.innerHTML =
-      '<h1>Select Mode</h1>' +
+      '<h1>Aim Trainer</h1>' +
+      renderGunRow() +
+      '<div class="section-title">Mode</div>' +
       '<div class="mode-grid">' +
         Object.keys(MODES).map(function (k) {
           return '<button class="mode-card" data-mode="' + k + '">' +
@@ -662,12 +800,8 @@
           '</button>';
         }).join("") +
       '</div>' +
-      '<div class="slider-row">' +
-        '<label for="sensSlider">Sens</label>' +
-        '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
-        '<span id="sensValue">' + sensitivity.toFixed(2) + 'x</span>' +
-      '</div>' +
-      '<p class="hint">Mouse lock ho jayega. <b>ESC</b> se pause / unlock.</p>';
+      renderSensSlider() +
+      '<p class="hint">Mouse lock ho jayega. <b>ESC</b> se pause. <b>R</b> se reload. <b>Hold left-click</b> for auto-fire.</p>';
     overlay.classList.remove("hidden");
   }
 
@@ -675,11 +809,7 @@
     panel.innerHTML =
       '<h1>Paused</h1>' +
       '<p>Mouse unlocked. Press Resume to continue.</p>' +
-      '<div class="slider-row">' +
-        '<label for="sensSlider">Sens</label>' +
-        '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
-        '<span id="sensValue">' + sensitivity.toFixed(2) + 'x</span>' +
-      '</div>' +
+      renderSensSlider() +
       '<div class="btn-row">' +
         '<button class="btn" data-action="resume">Resume</button>' +
         '<button class="btn ghost" data-action="menu">Menu</button>' +
@@ -688,14 +818,18 @@
   }
 
   /* =========================================================
-     Panel events (delegated)
+     Panel events
      ========================================================= */
   panel.addEventListener("click", function (e) {
-    const modeBtn = e.target.closest("[data-mode]");
-    if (modeBtn) {
-      startGame(modeBtn.getAttribute("data-mode"));
+    const gunBtn = e.target.closest("[data-gun]");
+    if (gunBtn) {
+      state.gunKey = gunBtn.getAttribute("data-gun");
+      try { localStorage.setItem("aim_gun", state.gunKey); } catch (err) {}
+      showMenu();
       return;
     }
+    const modeBtn = e.target.closest("[data-mode]");
+    if (modeBtn) { startGame(modeBtn.getAttribute("data-mode")); return; }
     const actionBtn = e.target.closest("[data-action]");
     if (!actionBtn) return;
     const action = actionBtn.getAttribute("data-action");
@@ -739,53 +873,96 @@
       e.preventDefault();
       return;
     }
-
     if (e.pointerType !== "mouse") {
       raw.x = e.clientX; raw.y = e.clientY;
       aim.x = raw.x; aim.y = raw.y;
     }
-
     if (!state.running) return;
     if (state.mode === "tracking") return;
 
-    shoot();
+    state.mouseDown = true;
+    // immediate shot
+    const now = nowMs();
+    const gun = GUNS[state.gunKey];
+    if (!state.isReloading && state.ammo > 0 && now - state.lastShotAt >= gun.fireDelay) {
+      fireShot();
+    } else if (state.ammo === 0 && !state.isReloading) {
+      startReload();
+    }
     e.preventDefault();
   });
 
+  window.addEventListener("pointerup", function () { state.mouseDown = false; });
   canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 
   window.addEventListener("resize", resize);
-  window.addEventListener("orientationchange", function () {
-    setTimeout(resize, 120);
+  window.addEventListener("orientationchange", function () { setTimeout(resize, 120); });
+
+  window.addEventListener("keydown", function (e) {
+    if (e.code === "KeyR" && state.running && state.mode !== "tracking") {
+      startReload();
+    }
   });
 
   /* =========================================================
-     Shooting
+     Firing
      ========================================================= */
-  function shoot() {
-    const mode = MODES[state.mode];
-    if (!mode) return;
+  function startReload() {
+    const gun = GUNS[state.gunKey];
+    if (state.isReloading) return;
+    if (state.ammo === gun.magSize) return;
+    state.isReloading = true;
+    state.reloadEndAt = nowMs() + gun.reloadTime;
+    state.mouseDown = false;
+    playReloadClick(300);
+    setTimeout(function () { playReloadClick(420); }, 160);
+    updateHud();
+  }
 
+  function finishReload() {
+    const gun = GUNS[state.gunKey];
+    state.ammo = gun.magSize;
+    state.isReloading = false;
+    state.reloadEndAt = 0;
+    playReloadClick(600);
+    updateHud();
+  }
+
+  function fireShot() {
+    const gun = GUNS[state.gunKey];
+    const mode = MODES[state.mode];
+    if (!mode || !mode.usesAmmo) return;
+
+    state.lastShotAt = nowMs();
+    state.ammo--;
     state.shots++;
+    state.muzzleFlash = 1;
+    playGunshot(gun);
 
     let hit = null;
     for (let i = 0; i < state.targets.length; i++) {
       const t = state.targets[i];
       if (t.visible === false) continue;
-      const dx = aim.x - t.x;
-      const dy = aim.y - t.y;
+      const dx = aim.x - t.x, dy = aim.y - t.y;
       if (dx * dx + dy * dy <= t.r * t.r) { hit = t; break; }
     }
 
     if (hit) {
       state.hits++;
       state.hitFlash = 1;
-      mode.onHit(hit);
-      beep(620, 0.06, "square", 0.04);
+      mode.onHit(hit, gun);
+      playHitConfirm();
     } else {
       mode.onMiss();
-      beep(150, 0.07, "square", 0.03);
     }
+
+    if (state.ammo === 0) {
+      // auto-reload after a short delay
+      setTimeout(function () {
+        if (state.running && state.ammo === 0) startReload();
+      }, 180);
+    }
+
     updateHud();
   }
 
@@ -796,41 +973,44 @@
     aim.x = raw.x;
     aim.y = raw.y;
 
-    if (state.running) {
-      state.timeLeft -= dt;
-      if (state.timeLeft <= 0) {
-        state.timeLeft = 0;
-        updateHud();
-        endGame();
-        return;
-      }
-      const mode = MODES[state.mode];
-      if (mode && mode.tick) mode.tick(dt);
+    if (state.hitFlash > 0) state.hitFlash = Math.max(0, state.hitFlash - dt * 5);
+    if (state.muzzleFlash > 0) state.muzzleFlash = Math.max(0, state.muzzleFlash - dt * 12);
+
+    if (!state.running) return;
+
+    state.timeLeft -= dt;
+    if (state.timeLeft <= 0) {
+      state.timeLeft = 0;
       updateHud();
+      endGame();
+      return;
     }
 
-    if (state.hitFlash > 0) {
-      state.hitFlash = Math.max(0, state.hitFlash - dt * 5);
+    // reload completion
+    if (state.isReloading && nowMs() >= state.reloadEndAt) finishReload();
+
+    // auto-fire while held
+    const mode = MODES[state.mode];
+    const gun = GUNS[state.gunKey];
+    if (mode && mode.usesAmmo && state.mouseDown && !state.isReloading && state.ammo > 0) {
+      const now = nowMs();
+      if (now - state.lastShotAt >= gun.fireDelay) fireShot();
+    } else if (mode && mode.usesAmmo && state.mouseDown && state.ammo === 0 && !state.isReloading) {
+      startReload();
     }
+
+    if (mode && mode.tick) mode.tick(dt);
+    updateHud();
   }
 
   /* =========================================================
      Render
      ========================================================= */
-  function render() {
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-    if (bgCanvas) ctx.drawImage(bgCanvas, 0, 0, W, H);
-
-    const mode = MODES[state.mode];
-    if (mode && mode.draw && state.running) mode.draw(ctx);
-
-    // targets
+  function drawTargets() {
     ctx.lineWidth = 2;
     for (let i = 0; i < state.targets.length; i++) {
       const t = state.targets[i];
       if (t.visible === false) continue;
-
       ctx.beginPath();
       ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
       ctx.fillStyle = "rgba(48, 40, 24, 0.9)";
@@ -848,8 +1028,9 @@
       ctx.fillStyle = "#e63a1e";
       ctx.fill();
     }
+  }
 
-    // crosshair
+  function drawCrosshair() {
     const flash = state.hitFlash;
     const cx = aim.x, cy = aim.y;
 
@@ -865,16 +1046,102 @@
     ctx.strokeStyle = "#ffb347";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(cx, cy - gap);       ctx.lineTo(cx, cy - gap - len);
-    ctx.moveTo(cx, cy + gap);       ctx.lineTo(cx, cy + gap + len);
-    ctx.moveTo(cx - gap, cy);       ctx.lineTo(cx - gap - len, cy);
-    ctx.moveTo(cx + gap, cy);       ctx.lineTo(cx + gap + len, cy);
+    ctx.moveTo(cx, cy - gap); ctx.lineTo(cx, cy - gap - len);
+    ctx.moveTo(cx, cy + gap); ctx.lineTo(cx, cy + gap + len);
+    ctx.moveTo(cx - gap, cy); ctx.lineTo(cx - gap - len, cy);
+    ctx.moveTo(cx + gap, cy); ctx.lineTo(cx + gap + len, cy);
     ctx.stroke();
 
     ctx.beginPath();
     ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
     ctx.fill();
+  }
+
+  function drawGun() {
+    if (!state.mode) return;
+    const mode = MODES[state.mode];
+    if (!mode.usesAmmo) return;
+
+    const gun = GUNS[state.gunKey];
+    const baseX = W - 240;
+    const baseY = H - 40;
+
+    // recoil kick toward upper-left + muzzle flash flicker
+    const flick = state.muzzleFlash;
+    const kx = -flick * gun.kick * 1.4;
+    const ky = -flick * gun.kick * 0.9;
+
+    ctx.save();
+    ctx.translate(baseX + kx, baseY + ky);
+
+    // Muzzle flash
+    if (flick > 0.05) {
+      const f = flick * flick;
+      ctx.fillStyle = "rgba(255, 220, 120, " + (f * 0.95).toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.moveTo(-20, -22);
+      ctx.lineTo(-40 - f * 18, -30);
+      ctx.lineTo(-30, -22);
+      ctx.lineTo(-40 - f * 18, -14);
+      ctx.lineTo(-20, -22);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(-24, -22, 5 + f * 6, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 245, 180, " + f.toFixed(3) + ")";
+      ctx.fill();
+    }
+
+    // Main body
+    ctx.fillStyle = gun.color;
+    ctx.fillRect(20, -30, 150, 22);
+
+    // Barrel
+    ctx.fillRect(-10, -22, 34, 8);
+
+    // Magazine
+    ctx.fillStyle = "#3a3a3a";
+    ctx.fillRect(96, -8, 20, 30);
+
+    // Grip
+    ctx.fillRect(124, -8, 30, 42);
+
+    // Stock
+    ctx.fillRect(166, -26, 44, 14);
+
+    // Highlight edge (top)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.fillRect(20, -30, 150, 3);
+
+    ctx.restore();
+
+    // Simple reload bar above gun
+    if (state.isReloading) {
+      const gun2 = GUNS[state.gunKey];
+      const p = 1 - clamp((state.reloadEndAt - nowMs()) / gun2.reloadTime, 0, 1);
+      const bw = 200, bx = W - 240 + 20, by = H - 82;
+      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.fillRect(bx, by, bw, 6);
+      ctx.fillStyle = "#ffb347";
+      ctx.fillRect(bx, by, bw * p, 6);
+      ctx.strokeStyle = "rgba(230, 170, 60, 0.6)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(bx + 0.5, by + 0.5, bw, 6);
+    }
+  }
+
+  function render() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (bgCanvas) ctx.drawImage(bgCanvas, 0, 0, W, H);
+
+    const mode = MODES[state.mode];
+    if (mode && mode.draw && state.running) mode.draw(ctx);
+
+    drawTargets();
+    if (state.running) drawGun();
+    drawCrosshair();
   }
 
   /* =========================================================
@@ -895,6 +1162,8 @@
   try {
     const s = parseFloat(localStorage.getItem("aim_sens"));
     if (s && s >= 0.2 && s <= 3) sensitivity = s;
+    const g = localStorage.getItem("aim_gun");
+    if (g && GUNS[g]) state.gunKey = g;
   } catch (e) {}
 
   resize();

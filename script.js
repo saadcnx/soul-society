@@ -72,41 +72,52 @@ function render(animate = false) {
 /* ---------- Feedback ---------- */
 let audioCtx = null;
 let audioBus = null;
+let noiseBuffer = null;
 
 function ensureAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     const master = audioCtx.createGain();
-    master.gain.value = 0.9;
+    master.gain.value = 0.95;
 
+    // Warm space so the duff sounds like it's in a room
     const reverb = audioCtx.createConvolver();
-    const len = audioCtx.sampleRate * 1.6;
+    const len = audioCtx.sampleRate * 1.4;
     const impulse = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
     for (let c = 0; c < 2; c++) {
       const ch = impulse.getChannelData(c);
       for (let i = 0; i < len; i++) {
-        ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6);
+        ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2);
       }
     }
     reverb.buffer = impulse;
 
     const wet = audioCtx.createGain();
-    wet.gain.value = 0.35;
+    wet.gain.value = 0.28;
     const dry = audioCtx.createGain();
-    dry.gain.value = 0.85;
+    dry.gain.value = 0.9;
 
     master.connect(dry).connect(audioCtx.destination);
     master.connect(reverb).connect(wet).connect(audioCtx.destination);
 
     audioBus = master;
+
+    // Pre-generate a white-noise buffer for drum transients
+    const nLen = audioCtx.sampleRate * 0.5;
+    noiseBuffer = audioCtx.createBuffer(1, nLen, audioCtx.sampleRate);
+    const nd = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < nLen; i++) nd[i] = Math.random() * 2 - 1;
   }
   if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
-/* Soft temple-bell chime: warm harmonics with gentle decay */
-const CHIME_NOTES = [523.25, 587.33, 659.25, 698.46, 783.99, 880.0];
-
+/* --- Daf / Duff frame-drum synthesis ---
+   Layered hit:
+   1) Deep "dum" — low pitched membrane tone with fast pitch drop
+   2) Sharp "tak" — filtered noise transient for the slap
+   3) Frame resonance — a short mid tom tone
+   Slight tuning variation per hit so it feels hand-played. */
 function playTick() {
   if (!state.soundOn) return;
   try {
@@ -114,43 +125,71 @@ function playTick() {
     const ctx = audioCtx;
     const now = ctx.currentTime;
 
-    const base = CHIME_NOTES[state.count % CHIME_NOTES.length];
+    // Slight per-hit tuning and stereo variation
+    const detune = 1 + (Math.random() * 0.06 - 0.03);
+    const panVal = Math.random() * 0.5 - 0.25;
 
-    // Partial frequencies for a soft bell-like timbre
-    const partials = [
-      { ratio: 1.0, gain: 0.35, decay: 0.9 },
-      { ratio: 2.0, gain: 0.12, decay: 0.7 },
-      { ratio: 2.76, gain: 0.06, decay: 0.55 },
-      { ratio: 4.07, gain: 0.035, decay: 0.45 },
-      { ratio: 5.43, gain: 0.02, decay: 0.35 },
-    ];
+    const panner = ctx.createStereoPanner();
+    panner.pan.value = panVal;
+    panner.connect(audioBus);
 
-    partials.forEach((p) => {
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = base * p.ratio;
+    // ---- 1) DUM: low membrane tone with pitch drop ----
+    const dumOsc = ctx.createOscillator();
+    const dumGain = ctx.createGain();
+    dumOsc.type = "sine";
+    const dumStart = 160 * detune;
+    const dumEnd = 62 * detune;
+    dumOsc.frequency.setValueAtTime(dumStart, now);
+    dumOsc.frequency.exponentialRampToValueAtTime(dumEnd, now + 0.14);
+    dumGain.gain.setValueAtTime(0.0001, now);
+    dumGain.gain.exponentialRampToValueAtTime(0.75, now + 0.006);
+    dumGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+    dumOsc.connect(dumGain).connect(panner);
+    dumOsc.start(now);
+    dumOsc.stop(now + 0.4);
 
-      g.gain.setValueAtTime(0.0001, now);
-      g.gain.exponentialRampToValueAtTime(p.gain, now + 0.008);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + p.decay);
+    // ---- 2) TAK: filtered noise attack (the slap) ----
+    const tak = ctx.createBufferSource();
+    tak.buffer = noiseBuffer;
+    const takFilter = ctx.createBiquadFilter();
+    takFilter.type = "bandpass";
+    takFilter.frequency.setValueAtTime(2600 * detune, now);
+    takFilter.frequency.exponentialRampToValueAtTime(900, now + 0.06);
+    takFilter.Q.value = 1.4;
+    const takGain = ctx.createGain();
+    takGain.gain.setValueAtTime(0.0001, now);
+    takGain.gain.exponentialRampToValueAtTime(0.4, now + 0.004);
+    takGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+    tak.connect(takFilter).connect(takGain).connect(panner);
+    tak.start(now);
+    tak.stop(now + 0.12);
 
-      osc.connect(g).connect(audioBus);
-      osc.start(now);
-      osc.stop(now + p.decay + 0.05);
-    });
+    // ---- 3) Frame resonance: short mid tom tone ----
+    const resOsc = ctx.createOscillator();
+    const resGain = ctx.createGain();
+    resOsc.type = "triangle";
+    resOsc.frequency.setValueAtTime(320 * detune, now);
+    resOsc.frequency.exponentialRampToValueAtTime(210 * detune, now + 0.09);
+    resGain.gain.setValueAtTime(0.0001, now);
+    resGain.gain.exponentialRampToValueAtTime(0.18, now + 0.005);
+    resGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+    resOsc.connect(resGain).connect(panner);
+    resOsc.start(now);
+    resOsc.stop(now + 0.2);
 
-    // Subtle airy shimmer
-    const shimmer = ctx.createOscillator();
-    const shimmerGain = ctx.createGain();
-    shimmer.type = "triangle";
-    shimmer.frequency.value = base * 8;
-    shimmerGain.gain.setValueAtTime(0.0001, now);
-    shimmerGain.gain.exponentialRampToValueAtTime(0.012, now + 0.005);
-    shimmerGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
-    shimmer.connect(shimmerGain).connect(audioBus);
-    shimmer.start(now);
-    shimmer.stop(now + 0.25);
+    // ---- 4) High edge tick for crispness ----
+    const edge = ctx.createBufferSource();
+    edge.buffer = noiseBuffer;
+    const edgeHp = ctx.createBiquadFilter();
+    edgeHp.type = "highpass";
+    edgeHp.frequency.value = 5200;
+    const edgeGain = ctx.createGain();
+    edgeGain.gain.setValueAtTime(0.0001, now);
+    edgeGain.gain.exponentialRampToValueAtTime(0.08, now + 0.003);
+    edgeGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+    edge.connect(edgeHp).connect(edgeGain).connect(panner);
+    edge.start(now);
+    edge.stop(now + 0.05);
   } catch {
     /* audio not available */
   }

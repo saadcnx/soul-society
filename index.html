@@ -369,30 +369,35 @@
       name: "M9", tag: "PISTOL",
       damage: 100, fireDelay: 140, magSize: 15, reloadTime: 900,
       color: "#9a9a9a", kick: 3,
+      recoilUp: 90, recoilSide: 30, recoilRecover: 22,
       sound: { bodyDur: 0.16, subFreq: 190, subVol: 0.14, bpFreq: 700, bpQ: 0.9, volume: 0.4, crackVol: 0.18 }
     },
     mp5: {
       name: "MP5", tag: "SMG",
       damage: 70, fireDelay: 80, magSize: 30, reloadTime: 1300,
       color: "#6a6a6a", kick: 2,
+      recoilUp: 65, recoilSide: 40, recoilRecover: 26,
       sound: { bodyDur: 0.10, subFreq: 230, subVol: 0.10, bpFreq: 950, bpQ: 1.0, volume: 0.32, crackVol: 0.20 }
     },
     ak47: {
       name: "AK-47", tag: "RIFLE",
       damage: 150, fireDelay: 115, magSize: 30, reloadTime: 1700,
       color: "#7a4a22", kick: 5,
+      recoilUp: 160, recoilSide: 60, recoilRecover: 16,
       sound: { bodyDur: 0.24, subFreq: 140, subVol: 0.18, bpFreq: 520, bpQ: 0.8, volume: 0.45, crackVol: 0.22 }
     },
     spas: {
       name: "SPAS-12", tag: "SHOTGUN",
       damage: 250, fireDelay: 700, magSize: 7, reloadTime: 2000,
       color: "#4a3a1a", kick: 10,
+      recoilUp: 260, recoilSide: 90, recoilRecover: 12,
       sound: { bodyDur: 0.42, subFreq: 90, subVol: 0.24, bpFreq: 340, bpQ: 0.7, volume: 0.55, crackVol: 0.14 }
     },
     awp: {
       name: "AWP", tag: "SNIPER",
       damage: 400, fireDelay: 1150, magSize: 5, reloadTime: 2300,
       color: "#3a4a34", kick: 12,
+      recoilUp: 340, recoilSide: 110, recoilRecover: 10,
       sound: { bodyDur: 0.55, subFreq: 115, subVol: 0.28, bpFreq: 380, bpQ: 0.6, volume: 0.6, crackVol: 0.26 }
     }
   };
@@ -418,7 +423,11 @@
     reloadEndAt: 0,
     lastShotAt: 0,
     mouseDown: false,
-    muzzleFlash: 0
+    muzzleFlash: 0,
+    recoilX: 0,
+    recoilY: 0,
+    recoilVelX: 0,
+    recoilVelY: 0
   };
 
   /* =========================================================
@@ -680,6 +689,10 @@
     state.reloadEndAt = 0;
     state.lastShotAt = 0;
     state.mouseDown = false;
+    state.recoilX = 0;
+    state.recoilY = 0;
+    state.recoilVelX = 0;
+    state.recoilVelY = 0;
     mode.init();
     hudMode.textContent = mode.name;
     updateHud();
@@ -937,6 +950,11 @@
     state.ammo--;
     state.shots++;
     state.muzzleFlash = 1;
+
+    // per-gun recoil kick — vertical (up) + horizontal (random side)
+    state.recoilVelY -= gun.recoilUp;
+    state.recoilVelX += rand(-gun.recoilSide, gun.recoilSide);
+
     playGunshot(gun);
 
     let hit = null;
@@ -988,6 +1006,17 @@
 
     // reload completion
     if (state.isReloading && nowMs() >= state.reloadEndAt) finishReload();
+
+    // recoil spring physics — pull back to rest, damped (per-gun recovery)
+    const gunRec = GUNS[state.gunKey].recoilRecover || 18;
+    const stiffness = 60 + gunRec * 8;
+    const damping = Math.pow(0.035, dt);
+    state.recoilVelY += -state.recoilY * stiffness * dt;
+    state.recoilVelY *= damping;
+    state.recoilY += state.recoilVelY * dt;
+    state.recoilVelX += -state.recoilX * stiffness * dt;
+    state.recoilVelX *= damping;
+    state.recoilX += state.recoilVelX * dt;
 
     // auto-fire while held
     const mode = MODES[state.mode];
@@ -1058,77 +1087,405 @@
     ctx.fill();
   }
 
+  /* -------- Muzzle flash helper (drawn at muzzle position) -------- */
+  function drawMuzzleFlash(c, mx, my, flash, size) {
+    const f = flash * flash;
+    const s = size || 1;
+    c.fillStyle = "rgba(255, 220, 120, " + (f * 0.95).toFixed(3) + ")";
+    c.beginPath();
+    c.moveTo(mx, my);
+    c.lineTo(mx - (26 + f * 20) * s, my - 8 * s);
+    c.lineTo(mx - (16 + f * 10) * s, my);
+    c.lineTo(mx - (26 + f * 20) * s, my + 8 * s);
+    c.closePath();
+    c.fill();
+
+    c.beginPath();
+    c.arc(mx - 4 * s, my, (5 + f * 7) * s, 0, Math.PI * 2);
+    c.fillStyle = "rgba(255, 245, 180, " + f.toFixed(3) + ")";
+    c.fill();
+
+    c.beginPath();
+    c.arc(mx - 2 * s, my, (2 + f * 3) * s, 0, Math.PI * 2);
+    c.fillStyle = "rgba(255, 255, 255, " + f.toFixed(3) + ")";
+    c.fill();
+  }
+
+  /* -------- Per-gun 2D sprites (side view, muzzle pointing LEFT) -------- */
+  /* Convention: origin (0,0) = gun's center-of-mass in local space.
+     Muzzle is at negative X, stock at positive X. Y up is negative. */
+
+  function drawM9(c, flash) {
+    // Slide
+    c.fillStyle = "#5a5a5a";
+    c.fillRect(-70, -22, 130, 20);
+    // Top highlight
+    c.fillStyle = "rgba(255,255,255,0.14)";
+    c.fillRect(-70, -22, 130, 3);
+    // Barrel tip
+    c.fillStyle = "#2a2a2a";
+    c.fillRect(-78, -18, 12, 12);
+    // Sights
+    c.fillStyle = "#1e1e1e";
+    c.fillRect(-64, -28, 6, 6);
+    c.fillRect(48, -28, 6, 6);
+    // Trigger guard
+    c.strokeStyle = "#2e2e2e";
+    c.lineWidth = 3;
+    c.beginPath();
+    c.arc(28, 4, 14, 0.15, Math.PI - 0.15);
+    c.stroke();
+    // Grip
+    c.fillStyle = "#2a2a2a";
+    c.beginPath();
+    c.moveTo(20, 4);
+    c.lineTo(58, 4);
+    c.lineTo(48, 62);
+    c.lineTo(8, 62);
+    c.closePath();
+    c.fill();
+    // Grip texture lines
+    c.strokeStyle = "rgba(255,255,255,0.06)";
+    c.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      c.beginPath();
+      c.moveTo(14 + i * 9, 14);
+      c.lineTo(10 + i * 9, 56);
+      c.stroke();
+    }
+
+    if (flash > 0.05) drawMuzzleFlash(c, -80, -12, flash, 0.85);
+  }
+
+  function drawMP5(c, flash) {
+    // Barrel
+    c.fillStyle = "#2e2e2e";
+    c.fillRect(-110, -14, 30, 10);
+    // Front sight post
+    c.fillRect(-98, -22, 5, 10);
+    // Handguard
+    c.fillStyle = "#3a3a3a";
+    c.fillRect(-82, -18, 70, 22);
+    c.fillStyle = "rgba(255,255,255,0.08)";
+    c.fillRect(-82, -18, 70, 3);
+    // Vent slots
+    c.fillStyle = "rgba(0,0,0,0.4)";
+    for (let i = 0; i < 4; i++) c.fillRect(-76 + i * 15, -12, 8, 3);
+    // Receiver
+    c.fillStyle = "#4a4a4a";
+    c.fillRect(-14, -22, 90, 24);
+    c.fillStyle = "rgba(255,255,255,0.12)";
+    c.fillRect(-14, -22, 90, 3);
+    // Ejection port
+    c.fillStyle = "#1a1a1a";
+    c.fillRect(10, -16, 26, 8);
+    // Rear sight drum
+    c.fillStyle = "#2a2a2a";
+    c.beginPath();
+    c.arc(-18, -26, 7, 0, Math.PI * 2);
+    c.fill();
+    // Magazine (angled)
+    c.fillStyle = "#333";
+    c.save();
+    c.translate(0, 0);
+    c.beginPath();
+    c.moveTo(-8, 2);
+    c.lineTo(20, 2);
+    c.lineTo(38, 78);
+    c.lineTo(10, 78);
+    c.closePath();
+    c.fill();
+    c.restore();
+    // Mag texture
+    c.strokeStyle = "rgba(255,255,255,0.07)";
+    c.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+      c.beginPath();
+      c.moveTo(0 + i * 7, 14);
+      c.lineTo(16 + i * 7, 72);
+      c.stroke();
+    }
+    // Pistol grip
+    c.fillStyle = "#2a2a2a";
+    c.beginPath();
+    c.moveTo(48, 2);
+    c.lineTo(82, 2);
+    c.lineTo(72, 60);
+    c.lineTo(38, 60);
+    c.closePath();
+    c.fill();
+    // Stock (retracted)
+    c.fillStyle = "#3a3a3a";
+    c.fillRect(76, -22, 60, 12);
+    c.fillStyle = "#222";
+    c.fillRect(130, -24, 20, 16);
+
+    if (flash > 0.05) drawMuzzleFlash(c, -112, -8, flash, 0.95);
+  }
+
+  function drawAK(c, flash) {
+    // Barrel
+    c.fillStyle = "#2a2a2a";
+    c.fillRect(-165, -12, 55, 8);
+    // Front sight block
+    c.fillStyle = "#1e1e1e";
+    c.fillRect(-152, -22, 8, 12);
+    // Gas tube
+    c.fillStyle = "#3a3a3a";
+    c.fillRect(-110, -18, 80, 12);
+    // Handguard (wood)
+    c.fillStyle = "#6b3f1c";
+    c.fillRect(-112, -10, 80, 24);
+    c.fillStyle = "rgba(0,0,0,0.25)";
+    c.fillRect(-112, -10, 80, 3);
+    c.fillStyle = "rgba(255,200,140,0.12)";
+    c.fillRect(-112, 8, 80, 5);
+    // Receiver
+    c.fillStyle = "#3a3a3a";
+    c.fillRect(-34, -20, 110, 26);
+    c.fillStyle = "rgba(255,255,255,0.1)";
+    c.fillRect(-34, -20, 110, 3);
+    // Ejection port
+    c.fillStyle = "#111";
+    c.fillRect(-12, -14, 30, 8);
+    // Charging handle
+    c.fillStyle = "#222";
+    c.fillRect(20, -24, 14, 6);
+    // Banana magazine (curved)
+    c.fillStyle = "#7a4a20";
+    c.beginPath();
+    c.moveTo(-6, 6);
+    c.lineTo(30, 6);
+    c.bezierCurveTo(70, 40, 90, 90, 80, 130);
+    c.lineTo(48, 130);
+    c.bezierCurveTo(60, 90, 40, 45, -6, 22);
+    c.closePath();
+    c.fill();
+    // Mag highlight
+    c.strokeStyle = "rgba(255,220,160,0.15)";
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(2, 12);
+    c.bezierCurveTo(50, 45, 65, 90, 58, 122);
+    c.stroke();
+    // Pistol grip
+    c.fillStyle = "#5a3218";
+    c.beginPath();
+    c.moveTo(44, 6);
+    c.lineTo(84, 6);
+    c.lineTo(72, 66);
+    c.lineTo(34, 66);
+    c.closePath();
+    c.fill();
+    // Trigger guard
+    c.strokeStyle = "#222";
+    c.lineWidth = 3;
+    c.beginPath();
+    c.arc(46, 12, 12, 0, Math.PI);
+    c.stroke();
+    // Wooden stock
+    c.fillStyle = "#6b3f1c";
+    c.beginPath();
+    c.moveTo(76, -18);
+    c.lineTo(180, -22);
+    c.lineTo(190, 2);
+    c.lineTo(80, 12);
+    c.closePath();
+    c.fill();
+    c.fillStyle = "rgba(0,0,0,0.2)";
+    c.fillRect(76, -18, 114, 3);
+
+    if (flash > 0.05) drawMuzzleFlash(c, -168, -8, flash, 1.15);
+  }
+
+  function drawSPAS(c, flash) {
+    // Barrel
+    c.fillStyle = "#2a2a2a";
+    c.fillRect(-170, -14, 100, 12);
+    // Heat shield with vents
+    c.fillStyle = "#3a3a3a";
+    c.fillRect(-160, -22, 90, 10);
+    c.fillStyle = "rgba(0,0,0,0.6)";
+    for (let i = 0; i < 5; i++) {
+      c.beginPath();
+      c.arc(-152 + i * 17, -17, 3, 0, Math.PI * 2);
+      c.fill();
+    }
+    // Pump forend (ribbed)
+    c.fillStyle = "#3a3a3a";
+    c.fillRect(-72, -18, 74, 24);
+    c.fillStyle = "rgba(255,255,255,0.08)";
+    c.fillRect(-72, -18, 74, 3);
+    // Pump ribs
+    c.fillStyle = "rgba(0,0,0,0.4)";
+    for (let i = 0; i < 6; i++) c.fillRect(-66 + i * 11, -14, 3, 16);
+    // Receiver
+    c.fillStyle = "#4a4a4a";
+    c.fillRect(-2, -22, 100, 26);
+    c.fillStyle = "rgba(255,255,255,0.1)";
+    c.fillRect(-2, -22, 100, 3);
+    // Ejection port
+    c.fillStyle = "#111";
+    c.fillRect(14, -14, 34, 10);
+    // Loading port on side
+    c.fillStyle = "rgba(0,0,0,0.5)";
+    c.fillRect(50, -8, 26, 6);
+    // Pistol grip
+    c.fillStyle = "#2a2a2a";
+    c.beginPath();
+    c.moveTo(56, 4);
+    c.lineTo(96, 4);
+    c.lineTo(86, 62);
+    c.lineTo(46, 62);
+    c.closePath();
+    c.fill();
+    // Trigger guard
+    c.strokeStyle = "#222";
+    c.lineWidth = 3;
+    c.beginPath();
+    c.arc(56, 10, 14, 0, Math.PI);
+    c.stroke();
+    // Stock
+    c.fillStyle = "#333";
+    c.beginPath();
+    c.moveTo(92, -20);
+    c.lineTo(196, -26);
+    c.lineTo(200, 8);
+    c.lineTo(96, 12);
+    c.closePath();
+    c.fill();
+    // Stock cheek rest
+    c.fillStyle = "#222";
+    c.fillRect(120, -32, 76, 10);
+
+    if (flash > 0.05) drawMuzzleFlash(c, -172, -8, flash, 1.25);
+  }
+
+  function drawAWP(c, flash) {
+    // Long barrel
+    c.fillStyle = "#1e1e1e";
+    c.fillRect(-200, -12, 110, 10);
+    // Barrel fluting highlight
+    c.fillStyle = "rgba(255,255,255,0.1)";
+    c.fillRect(-200, -12, 110, 2);
+    // Muzzle brake
+    c.fillStyle = "#2a2a2a";
+    c.fillRect(-206, -16, 14, 18);
+    c.fillStyle = "rgba(0,0,0,0.6)";
+    c.fillRect(-204, -12, 10, 3);
+    c.fillRect(-204, -4, 10, 3);
+    // Receiver
+    c.fillStyle = "#3a3a3a";
+    c.fillRect(-90, -20, 120, 26);
+    c.fillStyle = "rgba(255,255,255,0.12)";
+    c.fillRect(-90, -20, 120, 3);
+    // Bolt
+    c.fillStyle = "#222";
+    c.fillRect(0, -24, 30, 10);
+    // Bolt handle (ball)
+    c.beginPath();
+    c.arc(34, -10, 8, 0, Math.PI * 2);
+    c.fill();
+    // Scope mount
+    c.fillStyle = "#1a1a1a";
+    c.fillRect(-80, -34, 100, 14);
+    // Scope tube
+    c.fillStyle = "#252525";
+    c.fillRect(-90, -50, 110, 18);
+    c.fillStyle = "rgba(255,255,255,0.15)";
+    c.fillRect(-90, -50, 110, 3);
+    // Scope bell (front)
+    c.fillStyle = "#1a1a1a";
+    c.fillRect(-102, -56, 16, 30);
+    // Scope eyepiece (rear)
+    c.fillRect(18, -54, 18, 26);
+    // Scope rings
+    c.fillStyle = "#0e0e0e";
+    c.fillRect(-70, -54, 8, 12);
+    c.fillRect(-4, -54, 8, 12);
+    // Lens glint
+    c.fillStyle = "rgba(120, 200, 255, 0.35)";
+    c.beginPath();
+    c.arc(-94, -41, 5, 0, Math.PI * 2);
+    c.fill();
+    // Magazine
+    c.fillStyle = "#2a2a2a";
+    c.fillRect(-10, 6, 26, 30);
+    // Trigger guard
+    c.strokeStyle = "#1a1a1a";
+    c.lineWidth = 3;
+    c.beginPath();
+    c.arc(46, 8, 14, 0, Math.PI);
+    c.stroke();
+    // Pistol grip
+    c.fillStyle = "#2c3528";
+    c.beginPath();
+    c.moveTo(48, 4);
+    c.lineTo(88, 4);
+    c.lineTo(80, 66);
+    c.lineTo(40, 66);
+    c.closePath();
+    c.fill();
+    // Olive stock with thumbhole
+    c.fillStyle = "#2c3528";
+    c.beginPath();
+    c.moveTo(90, -20);
+    c.lineTo(200, -30);
+    c.lineTo(210, 6);
+    c.lineTo(96, 14);
+    c.closePath();
+    c.fill();
+    // Thumbhole
+    c.fillStyle = "#14120c";
+    c.beginPath();
+    c.ellipse(140, -4, 18, 10, 0, 0, Math.PI * 2);
+    c.fill();
+    // Cheek rest
+    c.fillStyle = "#232b1e";
+    c.fillRect(108, -38, 84, 10);
+
+    if (flash > 0.05) drawMuzzleFlash(c, -206, -7, flash, 1.4);
+  }
+
   function drawGun() {
     if (!state.mode) return;
     const mode = MODES[state.mode];
     if (!mode.usesAmmo) return;
 
-    const gun = GUNS[state.gunKey];
-    const baseX = W - 240;
-    const baseY = H - 40;
-
-    // recoil kick toward upper-left + muzzle flash flicker
-    const flick = state.muzzleFlash;
-    const kx = -flick * gun.kick * 1.4;
-    const ky = -flick * gun.kick * 0.9;
+    // Position: bottom-center viewmodel. Recoil kicks whole sprite up/back.
+    const scale = clamp(Math.min(W, H) / 1000, 0.55, 1.0);
+    const anchorX = W / 2 + state.recoilX;
+    const anchorY = H - 20 + state.recoilY;
 
     ctx.save();
-    ctx.translate(baseX + kx, baseY + ky);
+    ctx.translate(anchorX, anchorY);
+    // slight up-tilt so muzzle aims toward screen center
+    ctx.rotate(0.08);
+    ctx.scale(scale, scale);
 
-    // Muzzle flash
-    if (flick > 0.05) {
-      const f = flick * flick;
-      ctx.fillStyle = "rgba(255, 220, 120, " + (f * 0.95).toFixed(3) + ")";
-      ctx.beginPath();
-      ctx.moveTo(-20, -22);
-      ctx.lineTo(-40 - f * 18, -30);
-      ctx.lineTo(-30, -22);
-      ctx.lineTo(-40 - f * 18, -14);
-      ctx.lineTo(-20, -22);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(-24, -22, 5 + f * 6, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255, 245, 180, " + f.toFixed(3) + ")";
-      ctx.fill();
+    const flash = state.muzzleFlash;
+    switch (state.gunKey) {
+      case "m9":   drawM9(ctx, flash);   break;
+      case "mp5":  drawMP5(ctx, flash);  break;
+      case "ak47": drawAK(ctx, flash);   break;
+      case "spas": drawSPAS(ctx, flash); break;
+      case "awp":  drawAWP(ctx, flash);  break;
     }
-
-    // Main body
-    ctx.fillStyle = gun.color;
-    ctx.fillRect(20, -30, 150, 22);
-
-    // Barrel
-    ctx.fillRect(-10, -22, 34, 8);
-
-    // Magazine
-    ctx.fillStyle = "#3a3a3a";
-    ctx.fillRect(96, -8, 20, 30);
-
-    // Grip
-    ctx.fillRect(124, -8, 30, 42);
-
-    // Stock
-    ctx.fillRect(166, -26, 44, 14);
-
-    // Highlight edge (top)
-    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-    ctx.fillRect(20, -30, 150, 3);
 
     ctx.restore();
 
-    // Simple reload bar above gun
+    // Centered reload progress bar
     if (state.isReloading) {
       const gun2 = GUNS[state.gunKey];
       const p = 1 - clamp((state.reloadEndAt - nowMs()) / gun2.reloadTime, 0, 1);
-      const bw = 200, bx = W - 240 + 20, by = H - 82;
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-      ctx.fillRect(bx, by, bw, 6);
+      const bw = 220, bx = W / 2 - bw / 2, by = H - 100;
+      ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+      ctx.fillRect(bx, by, bw, 8);
       ctx.fillStyle = "#ffb347";
-      ctx.fillRect(bx, by, bw * p, 6);
-      ctx.strokeStyle = "rgba(230, 170, 60, 0.6)";
+      ctx.fillRect(bx, by, bw * p, 8);
+      ctx.strokeStyle = "rgba(230, 170, 60, 0.7)";
       ctx.lineWidth = 1;
-      ctx.strokeRect(bx + 0.5, by + 0.5, bw, 6);
+      ctx.strokeRect(bx + 0.5, by + 0.5, bw, 8);
     }
   }
 

@@ -130,8 +130,13 @@
   /* =========================================================
      Canvas
      ========================================================= */
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
+  let canvas, ctx;
+  try {
+    canvas = document.getElementById("game");
+    ctx = canvas.getContext("2d");
+  } catch (err) {
+    console.error("Canvas init failed:", err);
+  }
   const overlay = document.getElementById("overlay");
   const panel = document.getElementById("panel");
   const startBtn = document.getElementById("startBtn");
@@ -144,15 +149,20 @@
 
   let W = 0, H = 0, DPR = 1;
   function resize() {
-    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
-    W = window.innerWidth;
-    H = window.innerHeight;
-    canvas.width = Math.floor(W * DPR);
-    canvas.height = Math.floor(H * DPR);
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    ctx.imageSmoothingEnabled = false;
+    try {
+      if (!canvas || !ctx) return;
+      DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = Math.floor(W * DPR);
+      canvas.height = Math.floor(H * DPR);
+      canvas.style.width = W + "px";
+      canvas.style.height = H + "px";
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+    } catch (err) {
+      console.error("Resize failed:", err);
+    }
   }
 
   /* =========================================================
@@ -345,21 +355,30 @@
   let audioCtx = null;
   function initAudio() {
     if (audioCtx) return;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (AC) audioCtx = new AC();
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    } catch (err) {
+      console.warn("AudioContext unavailable:", err);
+      audioCtx = null;
+    }
   }
   function blip(freq, dur, type, vol) {
     if (!audioCtx) return;
-    const t = audioCtx.currentTime;
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.type = type || "square";
-    o.frequency.setValueAtTime(freq, t);
-    o.frequency.exponentialRampToValueAtTime(Math.max(60, freq * 0.6), t + dur);
-    g.gain.setValueAtTime(vol || 0.05, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(t); o.stop(t + dur + 0.02);
+    try {
+      const t = audioCtx.currentTime;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type || "square";
+      o.frequency.setValueAtTime(freq, t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(60, freq * 0.6), t + dur);
+      g.gain.setValueAtTime(vol || 0.05, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t); o.stop(t + dur + 0.02);
+    } catch (err) {
+      // audio graph may be torn down by browser (autoplay policy); ignore
+    }
   }
 
   /* =========================================================
@@ -381,8 +400,12 @@
   canvas.addEventListener("mousedown", function (e) {
     if (e.button === 0) {
       state.mouseDown = true;
-      initAudio();
-      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      try {
+        initAudio();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      } catch (err) {
+        console.warn("Audio resume failed:", err);
+      }
       tryFire();
     }
   });
@@ -393,8 +416,12 @@
 
   // touch: aim + fire
   canvas.addEventListener("touchstart", function (e) {
-    initAudio();
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    try {
+      initAudio();
+      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    } catch (err) {
+      console.warn("Audio resume failed:", err);
+    }
     const t = e.touches[0];
     aim.x = t.clientX; aim.y = t.clientY;
     state.mouseDown = true;
@@ -1128,8 +1155,12 @@
      Game flow
      ========================================================= */
   function startGame() {
-    initAudio();
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    try {
+      initAudio();
+      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    } catch (err) {
+      console.warn("Audio init failed on start:", err);
+    }
 
     player.x = 3 * BLOCK;
     player.y = GROUND_Y - player.h - 4;
@@ -1169,12 +1200,17 @@
      ========================================================= */
   let lastT = performance.now();
   function loop(t) {
-    let dt = (t - lastT) / 1000;
-    if (dt > 0.05) dt = 0.05;
-    lastT = t;
+    try {
+      let dt = (t - lastT) / 1000;
+      if (dt > 0.05) dt = 0.05;
+      lastT = t;
 
-    if (state.running) update(dt);
-    render();
+      if (state.running) update(dt);
+      render();
+    } catch (err) {
+      console.error("Frame error (recovering):", err);
+      state.running = false;
+    }
 
     requestAnimationFrame(loop);
   }

@@ -6,10 +6,11 @@
 <title>Aim Trainer — Arm Practice</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; overflow: hidden; background: #0b0f17; }
+  html, body { height: 100%; overflow: hidden; background: #14120c; }
   body {
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    color: #e6edf7;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: #e8dcc0;
+    letter-spacing: 0.02em;
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -43,26 +44,30 @@
     align-items: center;
     min-width: 92px;
     padding: 8px 14px;
-    border-radius: 12px;
-    background: rgba(18, 30, 48, 0.85);
-    border: 1px solid rgba(120, 170, 255, 0.18);
+    border-radius: 4px;
+    background: rgba(28, 24, 16, 0.88);
+    border: 1px solid rgba(230, 170, 60, 0.4);
+    box-shadow: inset 0 0 12px rgba(255, 150, 30, 0.06);
     transition: border-color 0.2s ease;
   }
   .chip .label {
-    font-size: 11px;
-    letter-spacing: 0.14em;
+    font-size: 10px;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: #7f93ad;
+    color: #a08d5e;
+    font-weight: 600;
   }
   .chip .value {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: #dff1ff;
+    color: #ffb347;
     line-height: 1.25;
+    font-family: ui-monospace, "Courier New", monospace;
+    text-shadow: 0 0 8px rgba(255, 150, 30, 0.35);
   }
-  .chip .value.hot { color: #7cf7c4; }
-  .chip .value.warn { color: #ff8b8b; }
+  .chip .value.hot { color: #ffe27a; text-shadow: 0 0 10px rgba(255, 210, 80, 0.5); }
+  .chip .value.warn { color: #ff5c33; text-shadow: 0 0 10px rgba(255, 60, 30, 0.5); }
 
   /* ---------- Overlay ---------- */
   .overlay {
@@ -70,42 +75,43 @@
     inset: 0;
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at 50% 45%, rgba(11, 15, 23, 0.72), rgba(11, 15, 23, 0.96));
+    background: radial-gradient(circle at 50% 45%, rgba(20, 18, 12, 0.82), rgba(10, 9, 6, 0.97));
     z-index: 10;
     transition: opacity 0.25s ease;
   }
   .overlay.hidden { opacity: 0; pointer-events: none; }
 
   .panel {
-    width: min(460px, 90vw);
+    width: min(480px, 90vw);
     padding: 28px 26px;
-    border-radius: 20px;
+    border-radius: 6px;
     text-align: center;
-    background: rgba(16, 24, 38, 0.94);
-    border: 1px solid rgba(120, 170, 255, 0.22);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    background: rgba(22, 19, 13, 0.96);
+    border: 1px solid rgba(230, 170, 60, 0.35);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 0 40px rgba(255, 150, 30, 0.04);
   }
   .panel h1 {
-    font-size: 27px;
-    letter-spacing: 0.02em;
-    margin-bottom: 12px;
-    background: linear-gradient(90deg, #7cf7c4, #4fd1ff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-size: 28px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    color: #ffb347;
+    font-weight: 800;
+    text-shadow: 0 0 20px rgba(255, 150, 30, 0.5);
   }
   .panel p {
     font-size: 14px;
     line-height: 1.75;
-    color: #9fb2c8;
+    color: #c9b98a;
     margin-bottom: 8px;
   }
   .panel .hint {
-    font-size: 13px;
-    color: #7f93ad;
+    font-size: 12px;
+    color: #8a7d5c;
     margin-bottom: 20px;
+    letter-spacing: 0.05em;
   }
-  .panel .hint b { color: #dff1ff; font-weight: 600; }
+  .panel .hint b { color: #ffb347; font-weight: 700; }
 
   .stats-grid {
     display: grid;
@@ -114,41 +120,102 @@
     margin: 18px 0 22px;
   }
   .stats-grid .cell {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(120, 170, 255, 0.12);
-    border-radius: 12px;
+    background: rgba(255, 180, 70, 0.05);
+    border: 1px solid rgba(230, 170, 60, 0.2);
+    border-radius: 4px;
     padding: 10px 8px;
   }
   .stats-grid .cell span {
     display: block;
-    font-size: 11px;
-    letter-spacing: 0.12em;
+    font-size: 10px;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
-    color: #7f93ad;
+    color: #a08d5e;
     margin-bottom: 4px;
+    font-weight: 600;
   }
   .stats-grid .cell strong {
-    font-size: 20px;
+    font-size: 22px;
     font-variant-numeric: tabular-nums;
-    color: #dff1ff;
+    color: #ffb347;
+    font-family: ui-monospace, "Courier New", monospace;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin: 0 0 20px;
+    background: rgba(255, 180, 70, 0.05);
+    border: 1px solid rgba(230, 170, 60, 0.2);
+    border-radius: 4px;
+  }
+  .slider-row label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #a08d5e;
+    font-weight: 700;
+    flex: 0 0 auto;
+  }
+  .slider-row input[type="range"] {
+    flex: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 4px;
+    background: rgba(230, 170, 60, 0.25);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ffb347;
+    border: 2px solid #1a1000;
+    box-shadow: 0 0 10px rgba(255, 150, 30, 0.7);
+    cursor: pointer;
+  }
+  .slider-row input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffb347;
+    border: 2px solid #1a1000;
+    box-shadow: 0 0 10px rgba(255, 150, 30, 0.7);
+    cursor: pointer;
+  }
+  .slider-row #sensValue {
+    flex: 0 0 auto;
+    min-width: 52px;
+    text-align: right;
+    font-family: ui-monospace, "Courier New", monospace;
+    font-size: 13px;
+    color: #ffb347;
+    font-weight: 700;
   }
 
   .btn {
     appearance: none;
-    border: 0;
+    border: 1px solid rgba(255, 200, 100, 0.5);
     cursor: pointer;
     font: inherit;
-    font-weight: 700;
-    font-size: 16px;
-    letter-spacing: 0.04em;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
     padding: 13px 42px;
-    border-radius: 999px;
-    color: #06131f;
-    background: linear-gradient(135deg, #7cf7c4, #4fd1ff);
-    box-shadow: 0 10px 30px rgba(79, 209, 255, 0.28);
+    border-radius: 4px;
+    color: #1a1000;
+    background: linear-gradient(135deg, #ffc46b, #ff8c1a);
+    box-shadow: 0 10px 30px rgba(255, 140, 26, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     transition: transform 0.12s ease, box-shadow 0.2s ease;
   }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(79, 209, 255, 0.38); }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(255, 140, 26, 0.5); }
   .btn:active { transform: translateY(0) scale(0.98); }
 </style>
 </head>
@@ -167,7 +234,12 @@
   <div class="panel" id="panel">
     <h1>Aim Trainer</h1>
     <p>Crosshair ko target par le jao aur <b>click</b> karo.</p>
-    <p class="hint">Har target ka apna timer hai — jaldi maro, streak barhao.</p>
+    <p class="hint">Mouse lock ho jayega — <b>ESC</b> se unlock / pause.</p>
+    <div class="slider-row">
+      <label for="sensSlider">Sens</label>
+      <input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="1" />
+      <span id="sensValue">1.00x</span>
+    </div>
     <button class="btn" id="startBtn">Start</button>
   </div>
 </div>
@@ -193,7 +265,6 @@
 
   const GAME_TIME = 60;        // seconds
   const MAX_TARGETS = 3;       // simultaneous targets
-  const SMOOTH_BASE = 0.70;    // lower = smoother/slower crosshair
 
   let W = 0;
   let H = 0;
@@ -201,6 +272,12 @@
   let vignette = null;
   let bgCanvas = null;
   let bgCtx = null;
+
+  let sensitivity = 1.0;
+  let pointerLocked = false;
+
+  const sensSlider = document.getElementById("sensSlider");
+  const sensValue = document.getElementById("sensValue");
 
   /* =========================================================
      State
@@ -285,7 +362,7 @@
     // cache vignette gradient
     vignette = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.25, W / 2, H / 2, Math.max(W, H) * 0.78);
     vignette.addColorStop(0, "rgba(0,0,0,0)");
-    vignette.addColorStop(1, "rgba(0,0,0,0.55)");
+    vignette.addColorStop(1, "rgba(0,0,0,0.72)");
 
     // Pre-render static background (grid + vignette) once per resize
     bgCanvas = document.createElement("canvas");
@@ -294,12 +371,12 @@
     bgCtx = bgCanvas.getContext("2d");
     bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    bgCtx.fillStyle = "#0b0f17";
+    bgCtx.fillStyle = "#14120c";
     bgCtx.fillRect(0, 0, W, H);
 
     const gap = 64;
     bgCtx.lineWidth = 1;
-    bgCtx.strokeStyle = "rgba(120, 170, 255, 0.055)";
+    bgCtx.strokeStyle = "rgba(230, 170, 60, 0.06)";
     bgCtx.beginPath();
     for (let x = 0.5; x <= W; x += gap) {
       bgCtx.moveTo(x, 0);
@@ -393,7 +470,7 @@
         size: rand(1.6, 3.6),
         life: rand(0.28, 0.6),
         maxLife: 0.6,
-        hue: Math.random() < 0.4 ? "#7cf7c4" : "#4fd1ff"
+        hue: Math.random() < 0.4 ? "#ffe27a" : "#ff8c1a"
       });
     }
     state.ripples.push({ x, y, radius: r * 0.6, maxRadius: r * 2.6, life: 0.42, maxLife: 0.42 });
@@ -425,9 +502,14 @@
   function startGame() {
     initAudio();
     resetGame();
+    raw.x = W / 2;
+    raw.y = H / 2;
+    aim.x = raw.x;
+    aim.y = raw.y;
     state.running = true;
     for (let i = 0; i < MAX_TARGETS; i++) spawnTarget();
     overlay.classList.add("hidden");
+    requestPointerLock();
     beep(520, 0.12, "triangle", 0.04);
   }
 
@@ -444,6 +526,11 @@
         '<div class="cell"><span>Accuracy</span><strong>' + acc + "%</strong></div>" +
         '<div class="cell"><span>Hits</span><strong>' + state.hits + "</strong></div>" +
         '<div class="cell"><span>Best Streak</span><strong>' + state.bestStreak + "</strong></div>" +
+      "</div>" +
+      '<div class="slider-row">' +
+        '<label for="sensSlider">Sens</label>' +
+        '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
+        '<span id="sensValue">' + sensitivity.toFixed(2) + "x</span>" +
       "</div>" +
       '<button class="btn" id="startBtn">Play Again</button>';
 
@@ -513,10 +600,9 @@
      Update
      ========================================================= */
   function update(dt) {
-    // --- smooth crosshair (frame-rate independent) ---
-    const k = 1 - Math.pow(SMOOTH_BASE, dt * 60);
-    aim.x += (raw.x - aim.x) * k;
-    aim.y += (raw.y - aim.y) * k;
+    // --- crosshair follows instantly (no smoothing = no input delay) ---
+    aim.x = raw.x;
+    aim.y = raw.y;
 
     // --- timer ---
     if (state.running) {
@@ -606,7 +692,7 @@
     if (bgCanvas) {
       ctx.drawImage(bgCanvas, 0, 0, W, H);
     } else {
-      ctx.fillStyle = "#0b0f17";
+      ctx.fillStyle = "#14120c";
       ctx.fillRect(0, 0, W, H);
     }
   }
@@ -618,8 +704,8 @@
       ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
       ctx.lineWidth = r.bad ? 2 : 3;
       ctx.strokeStyle = r.bad
-        ? "rgba(255, 110, 110, " + (a * 0.7).toFixed(3) + ")"
-        : "rgba(124, 247, 196, " + (a * 0.85).toFixed(3) + ")";
+        ? "rgba(230, 60, 40, " + (a * 0.75).toFixed(3) + ")"
+        : "rgba(255, 180, 70, " + (a * 0.85).toFixed(3) + ")";
       ctx.stroke();
     }
   }
@@ -638,28 +724,28 @@
       ctx.translate(t.x, t.y);
       ctx.scale(pulse, pulse);
 
-      // body
+      // body — dark olive tactical
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(18, 38, 63, 0.92)";
+      ctx.fillStyle = "rgba(38, 32, 20, 0.94)";
       ctx.fill();
 
-      // outer ring
+      // outer ring — amber
       ctx.lineWidth = 3;
-      ctx.strokeStyle = "#4fd1ff";
+      ctx.strokeStyle = "#ffb347";
       ctx.stroke();
 
       // middle ring
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.58, 0, Math.PI * 2);
       ctx.lineWidth = 2;
-      ctx.strokeStyle = "rgba(139, 233, 255, 0.75)";
+      ctx.strokeStyle = "rgba(255, 200, 120, 0.8)";
       ctx.stroke();
 
-      // bullseye
+      // bullseye — red-orange
       ctx.beginPath();
       ctx.arc(0, 0, Math.max(2, r * 0.17), 0, Math.PI * 2);
-      ctx.fillStyle = "#ff5f6d";
+      ctx.fillStyle = "#e63a1e";
       ctx.fill();
 
       ctx.restore();
@@ -669,8 +755,8 @@
       ctx.arc(t.x, t.y, t.r + 9, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * lifeRatio);
       ctx.lineWidth = 2;
       ctx.strokeStyle = lifeRatio < 0.3
-        ? "rgba(255, 140, 140, 0.85)"
-        : "rgba(255, 255, 255, 0.35)";
+        ? "rgba(255, 80, 40, 0.9)"
+        : "rgba(255, 200, 120, 0.45)";
       ctx.stroke();
     }
   }
@@ -700,15 +786,15 @@
     ctx.arc(0, 0, 16 + flash * 8, 0, Math.PI * 2);
     ctx.lineWidth = 2;
     ctx.strokeStyle = flash > 0
-      ? "rgba(124, 247, 196, " + (0.35 + flash * 0.6).toFixed(3) + ")"
-      : "rgba(124, 247, 196, 0.35)";
+      ? "rgba(255, 180, 70, " + (0.4 + flash * 0.6).toFixed(3) + ")"
+      : "rgba(255, 180, 70, 0.4)";
     ctx.stroke();
 
     // cross lines
     const gap = 5 + flash * 3;
     const len = 11;
     ctx.lineWidth = 2;
-    ctx.strokeStyle = "#7cf7c4";
+    ctx.strokeStyle = "#ffb347";
 
     ctx.beginPath();
     ctx.moveTo(0, -gap); ctx.lineTo(0, -gap - len);
@@ -761,22 +847,65 @@
   /* =========================================================
      Input
      ========================================================= */
+  function requestPointerLock() {
+    if (!canvas.requestPointerLock) return;
+    const p = canvas.requestPointerLock();
+    if (p && p.catch) p.catch(() => {});
+  }
+
+  document.addEventListener("pointerlockchange", () => {
+    pointerLocked = document.pointerLockElement === canvas;
+    if (!pointerLocked && state.running) {
+      // user pressed ESC — pause and show overlay
+      state.running = false;
+      overlay.classList.remove("hidden");
+      panel.innerHTML =
+        '<h1>Paused</h1>' +
+        '<p>Mouse unlock ho gaya.</p>' +
+        '<p class="hint"><b>Resume</b> dabao — cursor lock ho jayega.</p>' +
+        '<div class="slider-row">' +
+          '<label for="sensSlider">Sens</label>' +
+          '<input type="range" id="sensSlider" min="0.2" max="3" step="0.05" value="' + sensitivity + '" />' +
+          '<span id="sensValue">' + sensitivity.toFixed(2) + "x</span>" +
+        "</div>" +
+        '<button class="btn" id="startBtn">Resume</button>';
+      document.getElementById("startBtn").addEventListener("click", () => {
+        overlay.classList.add("hidden");
+        state.running = true;
+        requestPointerLock();
+      });
+    }
+  });
+
   canvas.addEventListener("pointermove", (e) => {
-    raw.x = e.clientX;
-    raw.y = e.clientY;
+    if (pointerLocked) {
+      // relative movement scaled by sensitivity — zero smoothing
+      raw.x = clamp(raw.x + e.movementX * sensitivity, 0, W);
+      raw.y = clamp(raw.y + e.movementY * sensitivity, 0, H);
+    } else {
+      raw.x = e.clientX;
+      raw.y = e.clientY;
+    }
   });
 
   canvas.addEventListener("pointerdown", (e) => {
     initAudio();
     if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
 
+    // If game running and pointer not locked, lock it first (mouse only)
+    if (state.running && !pointerLocked && e.pointerType === "mouse") {
+      requestPointerLock();
+      e.preventDefault();
+      return;
+    }
+
     // touch / pen: snap instantly so the tap lands where you pressed
     if (e.pointerType !== "mouse") {
       aim.x = e.clientX;
       aim.y = e.clientY;
+      raw.x = e.clientX;
+      raw.y = e.clientY;
     }
-    raw.x = e.clientX;
-    raw.y = e.clientY;
 
     shoot();
     e.preventDefault();
@@ -797,6 +926,25 @@
   });
 
   startBtn.addEventListener("click", startGame);
+
+  // Load saved sensitivity
+  try {
+    const saved = parseFloat(localStorage.getItem("aim_sens"));
+    if (saved && saved >= 0.2 && saved <= 3) sensitivity = saved;
+  } catch (e) {}
+
+  if (sensSlider) sensSlider.value = String(sensitivity);
+  if (sensValue) sensValue.textContent = sensitivity.toFixed(2) + "x";
+
+  // Delegated input handler (works after panel.innerHTML rebuilds)
+  panel.addEventListener("input", (e) => {
+    if (e.target && e.target.id === "sensSlider") {
+      sensitivity = parseFloat(e.target.value);
+      const valEl = document.getElementById("sensValue");
+      if (valEl) valEl.textContent = sensitivity.toFixed(2) + "x";
+      try { localStorage.setItem("aim_sens", String(sensitivity)); } catch (e2) {}
+    }
+  });
 
   /* =========================================================
      Boot
